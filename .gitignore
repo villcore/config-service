@@ -33,8 +33,4 @@ gen
 hs_err_pid*
 
 .idea/
-config-client/
-config-common/
-config-server/
-pom.xml
 target/
