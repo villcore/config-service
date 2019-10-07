@@ -19,7 +19,7 @@ public class ConfigDataWrapperFactory {
 
     public static DefaultConfigDataWrapper createFailoverConfigDataWrapper(
             ConfigServiceEnv configServiceEnv, ConfigData configData, ConfigTaskExecutor configTaskExecutor, ConfigHttpClient configHttpClient) {
-        DefaultConfigDataWrapper configDataWrapper = new FailoverConfigDataWrapper(configData, configServiceEnv, configTaskExecutor, configHttpClient);
+        FailoverConfigDataWrapper configDataWrapper = new FailoverConfigDataWrapper(configData, configServiceEnv, configTaskExecutor, configHttpClient);
         configTaskExecutor.addConfigWrapper(configDataWrapper);
         return configDataWrapper;
     }
