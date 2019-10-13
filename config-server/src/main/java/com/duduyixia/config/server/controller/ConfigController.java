@@ -1,5 +1,6 @@
 package com.duduyixia.config.server.controller;
 
+import com.duduyixia.config.server.bean.ConfigKey;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -8,7 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ConfigController {
 
-    // TODO: get config
+    public Object getConfig(ConfigKey configKey) {
+
+    }
 
     // TODO: listen
 }
