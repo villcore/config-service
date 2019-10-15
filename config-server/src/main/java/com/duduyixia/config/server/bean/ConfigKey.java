@@ -1,11 +1,12 @@
 package com.duduyixia.config.server.bean;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * created by WangTao on 2019-09-20
  */
-public class ConfigKey {
+public class ConfigKey implements Serializable {
 
     private String namespace;
     private String env;

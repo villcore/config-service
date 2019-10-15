@@ -8,7 +8,4 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ConfigSyncController {
 
-    /**
-     * 内部接口，用来同步配置信息
-     */
 }
