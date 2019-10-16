@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * created by WangTao on 2019-09-20
  */
-@Component
 public class ConfigManager {
 
     private static final Logger log = LoggerFactory.getLogger(ConfigManager.class);

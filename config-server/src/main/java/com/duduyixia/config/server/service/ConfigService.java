@@ -24,7 +24,7 @@ public class ConfigService {
     private ConfigManager configManager;
 
     @Resource
-    private ClientWatcherManager clientWatcherManager;
+    private ConfigWatcherManager clientWatcherManager;
 
     /**
      *
