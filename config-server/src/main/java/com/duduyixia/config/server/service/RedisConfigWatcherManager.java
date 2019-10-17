@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +30,9 @@ public class RedisConfigWatcherManager extends ConfigWatcherManager {
     }
 
     private JedisPool buildJedisPool() {
-
+        JedisPool jedisPool = new JedisPool();
+        // TODO: config it
+        return jedisPool;
     }
 
     @Override

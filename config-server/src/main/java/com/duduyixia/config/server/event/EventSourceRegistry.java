@@ -1,5 +1,8 @@
 package com.duduyixia.config.server.event;
 
-public final class EventSourceRegistry {
+public interface EventSourceRegistry {
 
+    public <T> boolean registerEventSource(EventSource<T> eventSource);
+
+    public <T> EventSource<T> getEventSource(String eventSourceName);
 }

@@ -3,6 +3,7 @@ package com.duduyixia.config.server.service;
 import com.duduyixia.config.server.bean.ConfigData;
 import com.duduyixia.config.server.bean.ConfigKey;
 import com.duduyixia.config.server.event.EventSource;
+import com.duduyixia.config.server.event.EventSources;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -32,13 +33,14 @@ public class ConfigManager {
     private final LoadingCache<ConfigKey, ConfigData> configCache;
     private ScheduledFuture<?> cleanupSchedulerFuture ;
 
-    // TODO: listen event notify
+    private EventSource<ConfigKey> configChangeEventSource;
 
     // TODO: maybe autowired
     public ConfigManager() {
         configCounter = new AtomicInteger(0);
         scheduler = Executors.newSingleThreadScheduledExecutor();
         configCache = createConfigCache();
+        configChangeEventSource = EventSources.configChangeEventSource();
         initialize();
     }
 
@@ -77,6 +79,8 @@ public class ConfigManager {
                 configCleanAllIntervalSeconds,
                 configCleanAllIntervalSeconds,
                 TimeUnit.SECONDS);
+
+        configChangeEventSource.subscribe(this::removeConfig);
     }
 
     private ConfigData loadConfig(ConfigKey configKey) {
@@ -84,6 +88,9 @@ public class ConfigManager {
         // TODO: 如果不存在或已经删除
         ConfigData configData = new ConfigData();
         configData.setMarkDeleted(true);
+
+        // TODO:
+        return null;
     }
 
     private void cleanConfig() {
@@ -107,6 +114,7 @@ public class ConfigManager {
 
     public void removeConfig(ConfigKey configKey) {
         configCache.invalidate(configKey);
+        cleanConfig();
     }
 
     public void clearAll() {

@@ -10,14 +10,30 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConfigAdminController {
 
     @RequestMapping("api/v1/config/admin/publish")
-    public Object publishConfig() {}
+    public Object publishConfig() {
+
+        // TODO:
+        return null;
+    }
 
     @RequestMapping("api/v1/config/admin/publish_beta")
-    public Object publishBetaConfig() {}
+    public Object publishBetaConfig() {
+
+        // TODO:
+        return null;
+    }
 
     @RequestMapping("api/v1/config/admin/delete")
-    public Object deleteConfig() {}
+    public Object deleteConfig() {
+
+        // TODO:
+        return null;
+    }
 
     @RequestMapping("api/v1/config/admin/list_client")
-    public Object listClient() {}
+    public Object listClient() {
+
+        // TODO:
+        return null;
+    }
 }
