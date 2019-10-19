@@ -10,7 +10,6 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -40,7 +39,7 @@ public class ConfigManager {
         configCounter = new AtomicInteger(0);
         scheduler = Executors.newSingleThreadScheduledExecutor();
         configCache = createConfigCache();
-        configChangeEventSource = EventSources.configChangeEventSource();
+        configChangeEventSource = EventSources.getConfigChangeEventSource();
         initialize();
     }
 

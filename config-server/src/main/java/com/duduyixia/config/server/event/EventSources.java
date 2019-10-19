@@ -7,7 +7,7 @@ import com.duduyixia.config.server.bean.ConfigKey;
  */
 public class EventSources {
 
-    public static EventSource<ConfigKey> configChangeEventSource() {
+    public static EventSource<ConfigKey> getConfigChangeEventSource() {
         return EventSourceHelper.getEventSoource("config_change_event");
     }
 

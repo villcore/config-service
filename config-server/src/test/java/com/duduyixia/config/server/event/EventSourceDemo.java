@@ -30,10 +30,15 @@ public class EventSourceDemo {
                 return thread;
             }
         }), e -> {
-            println(Thread.currentThread().getName() + " -> " + e);
+            try {
+                Thread.sleep(10);
+                println(Thread.currentThread().getName() + " -> " + e);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         });
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000000000; i++) {
             timeMillisEventSource.publish(System.currentTimeMillis());
         }
 
