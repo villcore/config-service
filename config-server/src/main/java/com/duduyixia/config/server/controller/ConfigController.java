@@ -26,9 +26,9 @@ public class ConfigController {
     }
 
     @PostMapping("api/v1/config/watch")
-    public Map<ConfigKey, ConfigDataDTO> watchConfig(@RequestParam("configMd5") Map<ConfigKey, String> configMd5) {
+    public Map<ConfigKey, ConfigDataDTO> watchConfig(@RequestParam("configMd5") Map<ConfigKey, String> configMd5, long timeoutMs) {
         // TODO: 异步化处理http
         String clientIp = RequestUtils.getRemoteIp();
-        return configService.watchConfig(configMd5, clientIp);
+        return configService.watchConfig(configMd5, clientIp, timeoutMs);
     }
 }

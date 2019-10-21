@@ -1,5 +1,6 @@
 package com.duduyixia.config.server.service;
 
+import com.duduyixia.config.server.bean.ConfigBetaIp;
 import com.duduyixia.config.server.bean.ConfigData;
 import com.duduyixia.config.server.bean.ConfigKey;
 import com.duduyixia.config.server.event.EventSource;

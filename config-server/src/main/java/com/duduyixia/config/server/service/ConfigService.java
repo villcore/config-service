@@ -86,7 +86,7 @@ public class ConfigService {
      * @param clientIp
      * @return
      */
-    public Map<ConfigKey, ConfigDataDTO> watchConfig(Map<ConfigKey, String> configMd5, String clientIp) {
+    public Map<ConfigKey, ConfigDataDTO> watchConfig(Map<ConfigKey, String> configMd5, String clientIp, long timeoutMs) {
         clientWatcherManager.reportClientConfig(configMd5, clientIp);
 
         Map<ConfigKey, ConfigDataDTO> changedConfigData = new HashMap<>();
@@ -102,12 +102,7 @@ public class ConfigService {
         });
 
         if (!changedConfigData.isEmpty()) {
-            // put into timeWheel
-            // define a callback function
+            return;
         }
-        // check md5 version, if modifyed, get and return
-
-        // TODO:
-        return null;
     }
 }

@@ -2,7 +2,7 @@ package com.duduyixia.config.server.service.timer;
 
 public abstract class TimerTask implements Runnable {
 
-    private int delayMs;
+    protected int delayMs;
     private TimerTaskEntry timerTaskEntry;
 
     public synchronized void cancel() {
