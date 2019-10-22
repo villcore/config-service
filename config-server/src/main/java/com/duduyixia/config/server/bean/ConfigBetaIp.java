@@ -8,6 +8,7 @@ public class ConfigBetaIp implements Serializable {
     private Integer id;
     private Integer configId;
     private String ip;
+
     private boolean exist;
 
     public Integer getId() {

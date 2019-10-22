@@ -21,6 +21,8 @@ public class ConfigData implements Serializable {
 
     private boolean isBeta;
     private String betaIps;
+    private String betaValue;
+    private String betaMd5;
 
     public Integer getId() {
         return id;
@@ -118,6 +120,22 @@ public class ConfigData implements Serializable {
         this.betaIps = betaIps;
     }
 
+    public String getBetaValue() {
+        return betaValue;
+    }
+
+    public void setBetaValue(String betaValue) {
+        this.betaValue = betaValue;
+    }
+
+    public String getBetaMd5() {
+        return betaMd5;
+    }
+
+    public void setBetaMd5(String betaMd5) {
+        this.betaMd5 = betaMd5;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -134,12 +152,14 @@ public class ConfigData implements Serializable {
                 Objects.equals(config, that.config) &&
                 Objects.equals(value, that.value) &&
                 Objects.equals(md5, that.md5) &&
-                Objects.equals(betaIps, that.betaIps);
+                Objects.equals(betaIps, that.betaIps) &&
+                Objects.equals(betaValue, that.betaValue) &&
+                Objects.equals(betaMd5, that.betaMd5);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, namespace, env, app, group, config, value, md5, markDeleted, updateTimeMs, isBeta, betaIps);
+        return Objects.hash(id, namespace, env, app, group, config, value, md5, markDeleted, updateTimeMs, isBeta, betaIps, betaValue, betaMd5);
     }
 
     @Override
@@ -157,6 +177,8 @@ public class ConfigData implements Serializable {
                 ", updateTimeMs=" + updateTimeMs +
                 ", isBeta=" + isBeta +
                 ", betaIps='" + betaIps + '\'' +
+                ", betaValue='" + betaValue + '\'' +
+                ", betaMd5='" + betaMd5 + '\'' +
                 '}';
     }
 }

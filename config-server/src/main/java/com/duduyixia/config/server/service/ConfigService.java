@@ -92,17 +92,40 @@ public class ConfigService {
         Map<ConfigKey, ConfigDataDTO> changedConfigData = new HashMap<>();
         configMd5.forEach((k, v) -> {
             ConfigData configData = configManager.getConfig(k);
-            if (!Objects.equals(configData.getMd5(), v)) {
-                if (configData.isMarkDeleted()) {
-                    changedConfigData.put(k, createDeletedConfigDTO());
-                } else {
-                    changedConfigData.put(k, createConfigDTO(configData, false));
+            if (configData.isBeta()) {
+                boolean clientBeta = false;
+                String betaIps = configData.getBetaIps();
+                String[] betaIpSplits = betaIps.split(",");
+                for (String betaIp : betaIpSplits) {
+                    if (Objects.equals(betaIp, clientIp)) {
+                        clientBeta = true;
+                        break;
+                    }
+                }
+
+                if (clientBeta && !Objects.equals(configData.getBetaMd5(), v)) {
+                    if (configData.isMarkDeleted()) {
+                        changedConfigData.put(k, createDeletedConfigDTO());
+                    } else {
+                        changedConfigData.put(k, createConfigDTO(configData, false));
+                    }
+                }
+            } else {
+                if (!Objects.equals(configData.getMd5(), v)) {
+                    if (configData.isMarkDeleted()) {
+                        changedConfigData.put(k, createDeletedConfigDTO());
+                    } else {
+                        changedConfigData.put(k, createConfigDTO(configData, false));
+                    }
                 }
             }
         });
 
         if (!changedConfigData.isEmpty()) {
+            // 直接返回
             return;
         }
+
+
     }
 }
