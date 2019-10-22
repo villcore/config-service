@@ -69,4 +69,8 @@ public class TimerTaskEntry implements Comparable<TimerTaskEntry> {
     public int compareTo(TimerTaskEntry o) {
         return Long.compare(expirationMs, o.expirationMs);
     }
+
+    public long getExpirationMs() {
+        return expirationMs;
+    }
 }

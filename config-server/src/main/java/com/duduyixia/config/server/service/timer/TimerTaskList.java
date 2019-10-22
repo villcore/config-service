@@ -1,12 +1,13 @@
 package com.duduyixia.config.server.service.timer;
 
 import java.util.Objects;
+import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-public class TimerTaskList implements Comparable<TimerTaskList> {
+public class TimerTaskList implements Delayed {
 
     private final TimerTaskEntry root = new TimerTaskEntry(null, -1);
 
@@ -82,12 +83,17 @@ public class TimerTaskList implements Comparable<TimerTaskList> {
         }
     }
 
+    @Override
     public long getDelay(TimeUnit unit) {
         return unit.convert(Math.max(0, getExpiration() - Time.SYSTEM.hiResClockMs()), TimeUnit.MILLISECONDS);
     }
 
-    @Override
     public int compareTo(TimerTaskList o) {
         return Long.compare(getExpiration(), o.getExpiration());
+    }
+
+    @Override
+    public int compareTo(Delayed o) {
+        return Long.compare(getExpiration(), ((TimerTaskList) o).getExpiration());
     }
 }
