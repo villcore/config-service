@@ -6,7 +6,6 @@ import javax.annotation.concurrent.ThreadSafe;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Consumer;
 
 /**
  * created by WangTao on 2019-10-22
@@ -62,25 +61,26 @@ public class SystemTimer implements Timer {
         }
     }
 
-    private final Consumer<TimerTaskEntry> reinsert = this::addTimerTaskEntry;
-
     @Override
     public boolean advanceClock(long timeoutMs) {
+        System.out.println("Timer advanced clock " + timeoutMs);
         try {
             TimerTaskList bucket = delayQueue.poll(timeoutMs, TimeUnit.MILLISECONDS);
-            if (bucket != null) {
-                writeLock.lock();
-                try {
-                    while (bucket != null) {
-                        timingWheel.advanceClock(timeoutMs);
-                        bucket.flush(reinsert);
-                        bucket = delayQueue.poll();
-                    }
-                } finally {
-                    writeLock.unlock();
-                }
-            } else {
+            if (bucket == null) {
                 return false;
+            }
+
+            System.out.println("before lock");
+            writeLock.lock();
+            try {
+                System.out.println("before2 lock");
+                while (bucket != null) {
+                    timingWheel.advanceClock(timeoutMs);
+                    bucket.flush(this::addTimerTaskEntry);
+                    bucket = delayQueue.poll();
+                }
+            } finally {
+                writeLock.unlock();
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

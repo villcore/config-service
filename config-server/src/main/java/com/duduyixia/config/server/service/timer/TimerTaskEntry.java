@@ -2,17 +2,20 @@ package com.duduyixia.config.server.service.timer;
 
 public class TimerTaskEntry implements Comparable<TimerTaskEntry> {
 
+    private final TimerTask timerTask;
+    private final long expirationMs;
+
     private volatile TimerTaskList list;
     private TimerTaskEntry next;
     private TimerTaskEntry prev;
 
-    private final TimerTask timerTask;
-    private final long expirationMs;
-
     public TimerTaskEntry(TimerTask timerTask, long expirationMs) {
         this.timerTask = timerTask;
         this.expirationMs = expirationMs;
-        this.timerTask.setTimerTaskEntry(this);
+
+        if (timerTask != null) {
+            this.timerTask.setTimerTaskEntry(this);
+        }
     }
 
     public boolean cancelled() {
@@ -55,14 +58,16 @@ public class TimerTaskEntry implements Comparable<TimerTaskEntry> {
         this.list = list;
     }
 
-    public void removeFormList(TimerTaskList timerTaskList) {
+    public synchronized boolean removeFromList(TimerTaskList timerTaskList) {
         if (getTimerTaskList() == timerTaskList) {
             getNext().setPrev(getPrev());
             getPrev().setNext(getNext());
             setNext(null);
             setPrev(null);
             setTimerTaskList(null);
+            return true;
         }
+        return false;
     }
 
     @Override

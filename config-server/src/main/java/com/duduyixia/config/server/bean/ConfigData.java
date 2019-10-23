@@ -1,6 +1,7 @@
 package com.duduyixia.config.server.bean;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -20,9 +21,10 @@ public class ConfigData implements Serializable {
     private long updateTimeMs;
 
     private boolean isBeta;
-    private String betaIps;
     private String betaValue;
     private String betaMd5;
+
+    private List<ConfigBetaIp> configBetaIpList;
 
     public Integer getId() {
         return id;
@@ -112,14 +114,6 @@ public class ConfigData implements Serializable {
         isBeta = beta;
     }
 
-    public String getBetaIps() {
-        return betaIps;
-    }
-
-    public void setBetaIps(String betaIps) {
-        this.betaIps = betaIps;
-    }
-
     public String getBetaValue() {
         return betaValue;
     }
@@ -136,49 +130,11 @@ public class ConfigData implements Serializable {
         this.betaMd5 = betaMd5;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ConfigData that = (ConfigData) o;
-        return markDeleted == that.markDeleted &&
-                updateTimeMs == that.updateTimeMs &&
-                isBeta == that.isBeta &&
-                Objects.equals(id, that.id) &&
-                Objects.equals(namespace, that.namespace) &&
-                Objects.equals(env, that.env) &&
-                Objects.equals(app, that.app) &&
-                Objects.equals(group, that.group) &&
-                Objects.equals(config, that.config) &&
-                Objects.equals(value, that.value) &&
-                Objects.equals(md5, that.md5) &&
-                Objects.equals(betaIps, that.betaIps) &&
-                Objects.equals(betaValue, that.betaValue) &&
-                Objects.equals(betaMd5, that.betaMd5);
+    public List<ConfigBetaIp> getConfigBetaIpList() {
+        return configBetaIpList;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, namespace, env, app, group, config, value, md5, markDeleted, updateTimeMs, isBeta, betaIps, betaValue, betaMd5);
-    }
-
-    @Override
-    public String toString() {
-        return "ConfigData{" +
-                "id=" + id +
-                ", namespace='" + namespace + '\'' +
-                ", env='" + env + '\'' +
-                ", app='" + app + '\'' +
-                ", group='" + group + '\'' +
-                ", config='" + config + '\'' +
-                ", value='" + value + '\'' +
-                ", md5='" + md5 + '\'' +
-                ", markDeleted=" + markDeleted +
-                ", updateTimeMs=" + updateTimeMs +
-                ", isBeta=" + isBeta +
-                ", betaIps='" + betaIps + '\'' +
-                ", betaValue='" + betaValue + '\'' +
-                ", betaMd5='" + betaMd5 + '\'' +
-                '}';
+    public void setConfigBetaIpList(List<ConfigBetaIp> configBetaIpList) {
+        this.configBetaIpList = configBetaIpList;
     }
 }

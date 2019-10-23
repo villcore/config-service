@@ -1,5 +1,7 @@
 package com.duduyixia.config.server.service;
 
+import com.duduyixia.config.server.service.timer.SystemTimer;
+import com.duduyixia.config.server.service.timer.Time;
 import com.duduyixia.config.server.service.timer.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +32,11 @@ public final class DelayedOperationPurgatory<T extends DelayedOperation> {
     private final ReentrantReadWriteLock removeWatchersLock;
     private final ExpiredOperationReaper expirationReaper;
     private final AtomicInteger estimatedTotalOperations;
+
+    public DelayedOperationPurgatory(String purgatoryName) {
+        this(purgatoryName, new SystemTimer(purgatoryName, 1, 20, Time.SYSTEM.hiResClockMs()),
+                1000, true, true);
+    }
 
     public DelayedOperationPurgatory(String purgatoryName, Timer timeoutTimer, int purgeInterval, boolean reaperEnable,
                                      boolean timerEnable) {
@@ -279,7 +286,8 @@ public final class DelayedOperationPurgatory<T extends DelayedOperation> {
         public void run() {
             log.info("Starting");
             while (isRunning.get()) {
-                advancedClock(200L);
+                //advancedClock(200L);
+                System.out.println("reaper");
             }
             log.info("Stopped");
         }

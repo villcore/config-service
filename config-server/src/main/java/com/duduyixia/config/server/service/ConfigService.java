@@ -1,5 +1,6 @@
 package com.duduyixia.config.server.service;
 
+import com.duduyixia.config.server.bean.ConfigBetaIp;
 import com.duduyixia.config.server.bean.ConfigData;
 import com.duduyixia.config.server.bean.ConfigKey;
 import com.duduyixia.config.server.dto.ConfigDataDTO;
@@ -8,9 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * created by WangTao on 2019-09-20
@@ -34,7 +33,7 @@ public class ConfigService {
      */
     public ConfigDataDTO getConfig(ConfigKey configKey, String clientIp) {
         ConfigData configData = configManager.getConfig(configKey);
-        if (configData.isMarkDeleted()) {
+        if (ConfigManager.isEmpty(configData) || configData.isMarkDeleted()) {
             return createDeletedConfigDTO();
         }
 
@@ -47,18 +46,13 @@ public class ConfigService {
             return false;
         }
 
-        String betaIps = configData.getBetaIps();
-        if (betaIps == null || betaIps.trim().isEmpty()) {
+        List<ConfigBetaIp> configBetaIpList = configData.getConfigBetaIpList();
+        if (configBetaIpList == null || configBetaIpList.isEmpty()) {
             return false;
         }
 
-        String[] betaIpSplits = betaIps.split(",");
-        if (betaIpSplits.length == 0) {
-            return false;
-        }
-
-        for (String betaIp : betaIpSplits) {
-            if (betaIp.equalsIgnoreCase(clientIp)) {
+        for (ConfigBetaIp betaIp : configBetaIpList) {
+            if (Objects.equals(betaIp.getIp(), clientIp)) {
                 return true;
             }
         }
@@ -87,45 +81,70 @@ public class ConfigService {
      * @return
      */
     public Map<ConfigKey, ConfigDataDTO> watchConfig(Map<ConfigKey, String> configMd5, String clientIp, long timeoutMs) {
-        clientWatcherManager.reportClientConfig(configMd5, clientIp);
+//        clientWatcherManager.reportClientConfig(configMd5, clientIp);
+//
+//        Map<ConfigKey, ConfigDataDTO> changedConfigData = new HashMap<>();
+//        configMd5.forEach((k, v) -> {
+//            ConfigData configData = configManager.getConfig(k);
+//
+//            if (configData.isBeta()) {
+//                boolean clientBeta = false;
+//                String betaIps = configData.getBetaIps();
+//                String[] betaIpSplits = betaIps.split(",");
+//                for (String betaIp : betaIpSplits) {
+//                    if (Objects.equals(betaIp, clientIp)) {
+//                        clientBeta = true;
+//                        break;
+//                    }
+//                }
+//
+//                if (clientBeta && !Objects.equals(configData.getBetaMd5(), v)) {
+//                    if (configData.isMarkDeleted()) {
+//                        changedConfigData.put(k, createDeletedConfigDTO());
+//                    } else {
+//                        changedConfigData.put(k, createConfigDTO(configData, false));
+//                    }
+//                }
+//            } else {
+//                if (!Objects.equals(configData.getMd5(), v)) {
+//                    if (configData.isMarkDeleted()) {
+//                        changedConfigData.put(k, createDeletedConfigDTO());
+//                    } else {
+//                        changedConfigData.put(k, createConfigDTO(configData, false));
+//                    }
+//                }
+//            }
+//        });
+//
+//        if (!changedConfigData.isEmpty()) {
+//            // 直接返回
+//            return;
+//        }
 
-        Map<ConfigKey, ConfigDataDTO> changedConfigData = new HashMap<>();
-        configMd5.forEach((k, v) -> {
-            ConfigData configData = configManager.getConfig(k);
-            if (configData.isBeta()) {
-                boolean clientBeta = false;
-                String betaIps = configData.getBetaIps();
-                String[] betaIpSplits = betaIps.split(",");
-                for (String betaIp : betaIpSplits) {
-                    if (Objects.equals(betaIp, clientIp)) {
-                        clientBeta = true;
-                        break;
-                    }
+        return null;
+    }
+
+    public static void main(String[] args) {
+        DelayedOperationPurgatory<DelayedOperation> purgatory = new DelayedOperationPurgatory<>("TEST");
+
+        for (int i = 0; i < 10; i++) {
+            purgatory.tryCompleteElseWatch(new DelayedOperation(1000 * 1000, null) {
+                @Override
+                public void onExpiration() {
+                    System.out.println("expiration");
                 }
 
-                if (clientBeta && !Objects.equals(configData.getBetaMd5(), v)) {
-                    if (configData.isMarkDeleted()) {
-                        changedConfigData.put(k, createDeletedConfigDTO());
-                    } else {
-                        changedConfigData.put(k, createConfigDTO(configData, false));
-                    }
+                @Override
+                public void onComplete() {
+                    System.out.println("onComplete");
                 }
-            } else {
-                if (!Objects.equals(configData.getMd5(), v)) {
-                    if (configData.isMarkDeleted()) {
-                        changedConfigData.put(k, createDeletedConfigDTO());
-                    } else {
-                        changedConfigData.put(k, createConfigDTO(configData, false));
-                    }
-                }
-            }
-        });
 
-        if (!changedConfigData.isEmpty()) {
-            // 直接返回
-            return;
+                @Override
+                public boolean tryComplete() {
+                    System.out.println("tryComplete");
+                    return false;
+                }
+            }, Arrays.asList("test"));
         }
-
-
     }
 }

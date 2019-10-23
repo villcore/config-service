@@ -3,6 +3,8 @@ package com.duduyixia.config.server.service;
 import com.duduyixia.config.server.bean.ConfigBetaIp;
 import com.duduyixia.config.server.bean.ConfigData;
 import com.duduyixia.config.server.bean.ConfigKey;
+import com.duduyixia.config.server.dao.ConfigBetaIpMapper;
+import com.duduyixia.config.server.dao.ConfigDataMapper;
 import com.duduyixia.config.server.event.EventSource;
 import com.duduyixia.config.server.event.EventSources;
 import com.google.common.cache.CacheBuilder;
@@ -11,7 +13,9 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -21,6 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ConfigManager {
 
     private static final Logger log = LoggerFactory.getLogger(ConfigManager.class);
+
+    private static final ConfigData EMPTY_CONFIG = new ConfigData();
 
     // TODO: use config
     private final int maxConfigCacheSize = 2048;
@@ -35,8 +41,14 @@ public class ConfigManager {
 
     private EventSource<ConfigKey> configChangeEventSource;
 
-    // TODO: maybe autowired
-    public ConfigManager() {
+    private final ConfigDataMapper configDataMapper;
+    private final ConfigBetaIpMapper configBetaIpMapper;
+
+    @Autowired
+    public ConfigManager(ConfigDataMapper configDataMapper, ConfigBetaIpMapper configBetaIpMapper) {
+        this.configDataMapper = configDataMapper;
+        this.configBetaIpMapper = configBetaIpMapper;
+
         configCounter = new AtomicInteger(0);
         scheduler = Executors.newSingleThreadScheduledExecutor();
         configCache = createConfigCache();
@@ -84,13 +96,16 @@ public class ConfigManager {
     }
 
     private ConfigData loadConfig(ConfigKey configKey) {
-        // TODO: ConfigDataMapper#getConfig
-        // TODO: 如果不存在或已经删除
-        ConfigData configData = new ConfigData();
-        configData.setMarkDeleted(true);
+        ConfigData configData = configDataMapper.getConfig(configKey);
+        if (configData == null) {
+            return EMPTY_CONFIG;
+        }
 
-        // TODO:
-        return null;
+        if (configData.isBeta()) {
+            List<ConfigBetaIp> configBetaIpList = configBetaIpMapper.getBetaIps(configData);
+            configData.setConfigBetaIpList(configBetaIpList);
+        }
+        return configData;
     }
 
     private void cleanConfig() {
@@ -120,5 +135,9 @@ public class ConfigManager {
     public void clearAll() {
         configCache.invalidateAll();
         cleanConfig();
+    }
+
+    public static boolean isEmpty(ConfigData configData) {
+        return EMPTY_CONFIG == configData;
     }
 }

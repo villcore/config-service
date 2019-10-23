@@ -1,8 +1,10 @@
 package com.duduyixia.config.server.service.timer;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@NotThreadSafe
 public class TimingWheel {
 
     private final long tickMs;
@@ -71,7 +73,7 @@ public class TimingWheel {
     }
 
     public void advanceClock(long timeMs) {
-        if (timeMs >= currentTime + timeMs) {
+        if (timeMs >= currentTime + tickMs) {
             currentTime = timeMs - (timeMs % tickMs);
         }
 

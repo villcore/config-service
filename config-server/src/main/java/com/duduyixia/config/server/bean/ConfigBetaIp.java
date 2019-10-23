@@ -8,8 +8,9 @@ public class ConfigBetaIp implements Serializable {
     private Integer id;
     private Integer configId;
     private String ip;
-
     private boolean exist;
+    private long updateTime;
+    private long createTime;
 
     public Integer getId() {
         return id;
@@ -43,29 +44,19 @@ public class ConfigBetaIp implements Serializable {
         this.exist = exist;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ConfigBetaIp that = (ConfigBetaIp) o;
-        return exist == that.exist &&
-                Objects.equals(id, that.id) &&
-                Objects.equals(configId, that.configId) &&
-                Objects.equals(ip, that.ip);
+    public long getUpdateTime() {
+        return updateTime;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, configId, ip, exist);
+    public void setUpdateTime(long updateTime) {
+        this.updateTime = updateTime;
     }
 
-    @Override
-    public String toString() {
-        return "ConfigBetaIp{" +
-                "id=" + id +
-                ", configId=" + configId +
-                ", ip='" + ip + '\'' +
-                ", exist=" + exist +
-                '}';
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
     }
 }

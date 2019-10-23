@@ -4,6 +4,7 @@ import com.duduyixia.config.server.service.timer.TimerTask;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * created by WangTao on 2019-10-22
@@ -17,7 +18,11 @@ public abstract class DelayedOperation extends TimerTask  {
 
     public DelayedOperation(long delayMs, Lock lock) {
         this.delayMs = delayMs;
-        this.lock = lock;
+        if (lock == null) {
+            this.lock = new ReentrantLock();
+        } else {
+            this.lock = lock;
+        }
 
         this.completed = new AtomicBoolean(false);
     }
@@ -40,8 +45,8 @@ public abstract class DelayedOperation extends TimerTask  {
 
     public abstract void onComplete();
 
-
     public abstract boolean tryComplete();
+
     public boolean maybeTryComplete() {
         if (lock.tryLock()) {
             try {

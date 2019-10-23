@@ -1,5 +1,6 @@
 package com.duduyixia.config.server.service.timer;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.util.Objects;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
@@ -7,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
+@ThreadSafe
 public class TimerTaskList implements Delayed {
 
     private final TimerTaskEntry root = new TimerTaskEntry(null, -1);
@@ -57,7 +59,7 @@ public class TimerTaskList implements Delayed {
                 timerTaskEntry.setPrev(tail);
                 timerTaskEntry.setTimerTaskList(this);
                 tail.setNext(timerTaskEntry);
-                tail.setPrev(timerTaskEntry);
+                root.setPrev(timerTaskEntry);
                 taskCounter.incrementAndGet();
                 done = true;
             }
@@ -66,8 +68,9 @@ public class TimerTaskList implements Delayed {
 
     public void remove(TimerTaskEntry timerTaskEntry) {
         synchronized (this) {
-            timerTaskEntry.removeFormList(this);
-            taskCounter.decrementAndGet();
+            if (timerTaskEntry.removeFromList(this)) {
+                taskCounter.decrementAndGet();
+            }
         }
     }
 
