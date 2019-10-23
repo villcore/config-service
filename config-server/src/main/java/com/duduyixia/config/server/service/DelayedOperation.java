@@ -32,7 +32,7 @@ public abstract class DelayedOperation extends TimerTask  {
         }
     }
 
-    public boolean idCompleted() {
+    public boolean isCompleted() {
         return completed.get();
     }
 
@@ -40,8 +40,8 @@ public abstract class DelayedOperation extends TimerTask  {
 
     public abstract void onComplete();
 
-    public abstract boolean tryComplete();
 
+    public abstract boolean tryComplete();
     public boolean maybeTryComplete() {
         if (lock.tryLock()) {
             try {
