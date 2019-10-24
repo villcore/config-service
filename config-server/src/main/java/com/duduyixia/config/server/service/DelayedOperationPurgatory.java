@@ -191,12 +191,12 @@ public final class DelayedOperationPurgatory<T extends DelayedOperation> {
 
     public void advancedClock(long timeoutMs) {
         timeoutTimer.advanceClock(timeoutMs);
-        if (estimatedTotalOperations.get() - delayed() > this.purgeInterval) {
-            estimatedTotalOperations.set(delayed());
-            for (Watchers watchers : allWatchers()) {
-                watchers.purgeCompleted();
-            }
-        }
+//        if (estimatedTotalOperations.get() - delayed() > this.purgeInterval) {
+//            estimatedTotalOperations.set(delayed());
+//            for (Watchers watchers : allWatchers()) {
+//                watchers.purgeCompleted();
+//            }
+//        }
     }
 
     private class Watchers {
@@ -286,7 +286,7 @@ public final class DelayedOperationPurgatory<T extends DelayedOperation> {
         public void run() {
             log.info("Starting");
             while (isRunning.get()) {
-                //advancedClock(200L);
+                advancedClock(200L);
                 System.out.println("reaper");
             }
             log.info("Stopped");

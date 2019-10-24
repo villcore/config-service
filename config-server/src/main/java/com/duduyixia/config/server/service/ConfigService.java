@@ -127,8 +127,8 @@ public class ConfigService {
     public static void main(String[] args) {
         DelayedOperationPurgatory<DelayedOperation> purgatory = new DelayedOperationPurgatory<>("TEST");
 
-        for (int i = 0; i < 10; i++) {
-            purgatory.tryCompleteElseWatch(new DelayedOperation(1000 * 1000, null) {
+        for (int i = 0; i < 2; i++) {
+            purgatory.tryCompleteElseWatch(new DelayedOperation(i * 1000, null) {
                 @Override
                 public void onExpiration() {
                     System.out.println("expiration");

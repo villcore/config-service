@@ -63,7 +63,7 @@ public class SystemTimer implements Timer {
 
     @Override
     public boolean advanceClock(long timeoutMs) {
-        System.out.println("Timer advanced clock " + timeoutMs);
+        System.out.println("Timer advanced clock " + timeoutMs + " delayQueue " +  delayQueue.size());
         try {
             TimerTaskList bucket = delayQueue.poll(timeoutMs, TimeUnit.MILLISECONDS);
             if (bucket == null) {
@@ -75,10 +75,13 @@ public class SystemTimer implements Timer {
             try {
                 System.out.println("before2 lock");
                 while (bucket != null) {
+                    System.out.println("A");
                     timingWheel.advanceClock(timeoutMs);
                     bucket.flush(this::addTimerTaskEntry);
+                    System.out.println("c");
                     bucket = delayQueue.poll();
                 }
+                System.out.println("b");
             } finally {
                 writeLock.unlock();
             }
