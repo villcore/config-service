@@ -50,7 +50,6 @@ public class TimingWheel {
 
     public boolean add(TimerTaskEntry timerTaskEntry) {
         long expirationMs = timerTaskEntry.getExpirationMs();
-
         if (timerTaskEntry.cancelled()) {
             return false;
         } else  if (expirationMs < currentTime + tickMs) {

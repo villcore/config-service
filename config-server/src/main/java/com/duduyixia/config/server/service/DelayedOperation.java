@@ -11,13 +11,12 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public abstract class DelayedOperation extends TimerTask  {
 
-    private final long delayMs;
     private final Lock lock;
 
     private final AtomicBoolean completed;
 
     public DelayedOperation(long delayMs, Lock lock) {
-        this.delayMs = delayMs;
+        this.delayMs = Math.toIntExact(delayMs);
         if (lock == null) {
             this.lock = new ReentrantLock();
         } else {

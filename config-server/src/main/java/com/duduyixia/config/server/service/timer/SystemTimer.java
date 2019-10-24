@@ -1,6 +1,8 @@
 package com.duduyixia.config.server.service.timer;
 
 import com.duduyixia.config.server.util.NamedThreadFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.concurrent.*;
@@ -12,6 +14,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 @ThreadSafe
 public class SystemTimer implements Timer {
+
+    private static final Logger log = LoggerFactory.getLogger(SystemTimer.class);
 
     private String executorName;
     private long tickMs = 1;
@@ -62,27 +66,20 @@ public class SystemTimer implements Timer {
     }
 
     @Override
-    public boolean advanceClock(long timeoutMs) {
-        System.out.println("Timer advanced clock " + timeoutMs + " delayQueue " +  delayQueue.size());
+    public boolean  advanceClock(long timeoutMs) {
         try {
             TimerTaskList bucket = delayQueue.poll(timeoutMs, TimeUnit.MILLISECONDS);
             if (bucket == null) {
                 return false;
             }
 
-            System.out.println("before lock");
             writeLock.lock();
             try {
-                System.out.println("before2 lock" + bucket);
                 while (bucket != null) {
-                    System.out.println(bucket.getExpiration());
-                    System.out.println("A");
-                    timingWheel.advanceClock(timeoutMs);
-                    //bucket.flush(this::addTimerTaskEntry);
-                    System.out.println("c");
+                    timingWheel.advanceClock(bucket.getExpiration());
+                    bucket.flush(this::addTimerTaskEntry);
                     bucket = delayQueue.poll();
                 }
-                System.out.println("b");
             } finally {
                 writeLock.unlock();
             }

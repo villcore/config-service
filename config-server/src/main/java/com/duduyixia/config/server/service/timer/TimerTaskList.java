@@ -78,7 +78,6 @@ public class TimerTaskList implements Delayed {
         synchronized (this) {
             TimerTaskEntry head = root.getNext();
             while (head != root) {
-                System.out.println("d" + head);
                 remove(head);
                 consumer.accept(head);
                 head = root.getNext();

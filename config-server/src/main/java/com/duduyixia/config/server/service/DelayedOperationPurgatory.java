@@ -34,8 +34,8 @@ public final class DelayedOperationPurgatory<T extends DelayedOperation> {
     private final AtomicInteger estimatedTotalOperations;
 
     public DelayedOperationPurgatory(String purgatoryName) {
-        this(purgatoryName, new SystemTimer(purgatoryName, 1, 20, Time.SYSTEM.hiResClockMs()),
-                1000, true, true);
+        this(purgatoryName, new SystemTimer(purgatoryName, 100, 50, Time.SYSTEM.hiResClockMs()),
+                10, true, true);
     }
 
     public DelayedOperationPurgatory(String purgatoryName, Timer timeoutTimer, int purgeInterval, boolean reaperEnable,
@@ -191,12 +191,12 @@ public final class DelayedOperationPurgatory<T extends DelayedOperation> {
 
     public void advancedClock(long timeoutMs) {
         timeoutTimer.advanceClock(timeoutMs);
-//        if (estimatedTotalOperations.get() - delayed() > this.purgeInterval) {
-//            estimatedTotalOperations.set(delayed());
-//            for (Watchers watchers : allWatchers()) {
-//                watchers.purgeCompleted();
-//            }
-//        }
+        if (estimatedTotalOperations.get() - delayed() > this.purgeInterval) {
+            estimatedTotalOperations.set(delayed());
+            for (Watchers watchers : allWatchers()) {
+                watchers.purgeCompleted();
+            }
+        }
     }
 
     private class Watchers {
@@ -277,8 +277,11 @@ public final class DelayedOperationPurgatory<T extends DelayedOperation> {
 
         private AtomicBoolean isRunning = new AtomicBoolean(true);
 
-        public ExpiredOperationReaper(String porgatoryName) {
-            setName("ExpirationReaper-" + purgatoryName);
+        private String purgatoryName;
+
+        public ExpiredOperationReaper(String purgatoryName) {
+            this.purgatoryName = purgatoryName;
+            setName("ExpirationReaper-" + this.purgatoryName);
             setDaemon(false);
         }
 
@@ -286,8 +289,7 @@ public final class DelayedOperationPurgatory<T extends DelayedOperation> {
         public void run() {
             log.info("Starting");
             while (isRunning.get()) {
-                advancedClock(200L);
-                System.out.println("reaper");
+                advancedClock(50L);
             }
             log.info("Stopped");
         }
