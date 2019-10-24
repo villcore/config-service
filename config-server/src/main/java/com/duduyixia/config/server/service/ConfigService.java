@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -87,8 +88,7 @@ public class ConfigService {
         clientWatcherManager.reportClientConfig(configMd5, clientIp);
 
         Map<ConfigKey, ConfigDataDTO> changedConfigData = new HashMap<>();
-
-        AtomicBoolean markedDelete = new AtomicBoolean(false);
+        AtomicBoolean allDeleted = new AtomicBoolean(true);
         configMd5.forEach((k, v) -> {
             ConfigData configData = configManager.getConfig(k);
             if (configData.isBeta()) {
@@ -103,34 +103,32 @@ public class ConfigService {
 
                 if (clientBeta && !Objects.equals(configData.getBetaMd5(), v)) {
                     if (configData.isMarkDeleted()) {
-                        markedDelete.set(true);
                         changedConfigData.put(k, createDeletedConfigDTO());
                     } else {
+                        allDeleted.set(false);
                         changedConfigData.put(k, createConfigDTO(configData, true));
                     }
                 }
             } else {
                 if (!Objects.equals(configData.getMd5(), v)) {
                     if (configData.isMarkDeleted()) {
-                        markedDelete.set(true);
                         changedConfigData.put(k, createDeletedConfigDTO());
                     } else {
+                        allDeleted.set(false);
                         changedConfigData.put(k, createConfigDTO(configData, false));
                     }
                 }
             }
         });
 
-        if (changedConfigData.isEmpty()) {
-            // wait time whell
-            return;
-        }
-
-        if (markedDelete.get()) {
+        // 如果map为空，等待timeoutMs
+        if (changedConfigData.isEmpty() || allDeleted.get()) {
             // wait
-            return;
+            final CountDownLatch waitLatch = new CountDownLatch(1);
+            // register all config data
+        } else {
+            return new AsyncResult<>(changedConfigData);
         }
-        return new AsyncResult<>(changedConfigData);
     }
 
     public static void main(String[] args) throws InterruptedException {
