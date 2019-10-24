@@ -73,11 +73,12 @@ public class SystemTimer implements Timer {
             System.out.println("before lock");
             writeLock.lock();
             try {
-                System.out.println("before2 lock");
+                System.out.println("before2 lock" + bucket);
                 while (bucket != null) {
+                    System.out.println(bucket.getExpiration());
                     System.out.println("A");
                     timingWheel.advanceClock(timeoutMs);
-                    bucket.flush(this::addTimerTaskEntry);
+                    //bucket.flush(this::addTimerTaskEntry);
                     System.out.println("c");
                     bucket = delayQueue.poll();
                 }
