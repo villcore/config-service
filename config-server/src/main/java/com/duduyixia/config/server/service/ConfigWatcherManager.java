@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -37,9 +37,15 @@ public abstract class ConfigWatcherManager {
 
     public abstract ConfigWatcherDTO getConfigClient(ConfigKey configKey);
 
-    public void watchConfig(ConfigKey configKey, String md5, Runnable callbackAction, int timeoutMs) {
-        // 提前1s返回
-        int timeout = timeoutMs >= 1000 ? timeoutMs - 1000 : timeoutMs;
+    public void watchConfig(Map<ConfigKey, String> changedConfig, final Set<ConfigKey> betaConfigData,
+                            Consumer<List<ConfigKey>> configChangeAction, long timeoutMs) {
+        changedConfig.forEach((configKey, md5) -> {
+            watchConfig(configKey, md5, betaConfigData.contains(configKey), configChangeAction, timeoutMs);
+        });
+    }
+
+    private void watchConfig(ConfigKey configKey, String md5, boolean isBeta, Consumer<List<ConfigKey>> configChangeAction, long timeoutMs) {
+
     }
 
     private class DelayedConfigChangedNotifyOperation extends DelayedOperation {
@@ -48,7 +54,6 @@ public abstract class ConfigWatcherManager {
         private boolean isBeta;
         private String md5;
         private long delayMs;
-        private final Set<ConfigKey> configKeys;
         private Runnable action;
 
         public DelayedConfigChangedNotifyOperation(long delayMs, Lock lock, ConfigKey configKey, boolean isBeta,
@@ -73,19 +78,18 @@ public abstract class ConfigWatcherManager {
 
         @Override
         public boolean tryComplete() {
-//            ConfigData configData = configManager.getConfig(configKey);
-//            if (ConfigManager.isEmpty(configData)) {
-//                return true;
-//            }
-//
-//            if (configData.isBeta() && !Objects.equals(configData.getBetaMd5(), md5)) {
-//                return true;
-//            }
-//
-//            if (!Objects.equals(configData.getMd5(), md5)) {
-//                return true;
-//            }
-//            return false;
+            ConfigData configData = configManager.getConfig(configKey);
+            if (ConfigManager.isEmpty(configData)) {
+                return true;
+            }
+
+            if (configData.isBeta() && !Objects.equals(configData.getBetaMd5(), md5)) {
+                return true;
+            }
+
+            if (!Objects.equals(configData.getMd5(), md5)) {
+                return true;
+            }
             return false;
         }
     }

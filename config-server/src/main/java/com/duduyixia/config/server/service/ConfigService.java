@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 /**
  * created by WangTao on 2019-09-20
@@ -78,17 +79,13 @@ public class ConfigService {
         return configDataDTO;
     }
 
-    /**
-     * @param configMd5
-     * @param clientIp
-     * @return
-     */
-    @Async
-    public Future<Set<ConfigKey>> watchConfig(Map<ConfigKey, String> configMd5, String clientIp, long timeoutMs) {
+    public void watchConfig(Map<ConfigKey, String> configMd5, String clientIp, long timeoutMs, Consumer<List<ConfigKey>> configChangeAction) {
         clientWatcherManager.reportClientConfig(configMd5, clientIp);
 
         Map<ConfigKey, ConfigDataDTO> changedConfigData = new HashMap<>();
+        Set<ConfigKey> betaConfigData = new HashSet<>();
         AtomicBoolean allDeleted = new AtomicBoolean(true);
+
         configMd5.forEach((k, v) -> {
             ConfigData configData = configManager.getConfig(k);
             if (configData.isBeta()) {
@@ -109,6 +106,7 @@ public class ConfigService {
                         changedConfigData.put(k, createConfigDTO(configData, true));
                     }
                 }
+                betaConfigData.add(k);
             } else {
                 if (!Objects.equals(configData.getMd5(), v)) {
                     if (configData.isMarkDeleted()) {
@@ -121,17 +119,11 @@ public class ConfigService {
             }
         });
 
-        // 如果map为空，等待timeoutMs
+        List<ConfigKey> changedConfig = new ArrayList<>(changedConfigData.keySet());
         if (changedConfigData.isEmpty() || allDeleted.get()) {
-            // wait
-            final Set<ConfigKey> configKeys = Collections.synchronizedSet(new HashSet<>());
-            final CountDownLatch waitLatch = new CountDownLatch(1);
-            // register all config data
-
-            waitLatch.await();
-            return new AsyncResult<>(configKeys);
+            clientWatcherManager.watchConfig(configMd5, betaConfigData, configChangeAction, timeoutMs);
         } else {
-            return new AsyncResult<>(changedConfigData.keySet());
+            configChangeAction.accept(changedConfig);
         }
     }
 
