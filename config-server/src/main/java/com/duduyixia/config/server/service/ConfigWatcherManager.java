@@ -4,11 +4,7 @@ import com.duduyixia.config.server.bean.ConfigData;
 import com.duduyixia.config.server.bean.ConfigKey;
 import com.duduyixia.config.server.dto.ConfigWatcherDTO;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.locks.Lock;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -45,7 +41,9 @@ public abstract class ConfigWatcherManager {
     }
 
     private void watchConfig(ConfigKey configKey, String md5, boolean isBeta, Consumer<List<ConfigKey>> configChangeAction, long timeoutMs) {
-
+        purgatory.tryCompleteElseWatch(
+                new DelayedConfigChangedNotifyOperation(configKey, isBeta, md5, configChangeAction, timeoutMs),
+                Collections.singletonList(configKey));
     }
 
     private class DelayedConfigChangedNotifyOperation extends DelayedOperation {
@@ -54,40 +52,41 @@ public abstract class ConfigWatcherManager {
         private boolean isBeta;
         private String md5;
         private long delayMs;
-        private Runnable action;
+        Consumer<List<ConfigKey>> configChangeAction;
 
-        public DelayedConfigChangedNotifyOperation(long delayMs, Lock lock, ConfigKey configKey, boolean isBeta,
-                                                   String md5, long delayMs1, Runnable action) {
-            super(delayMs, lock);
+        public DelayedConfigChangedNotifyOperation(ConfigKey configKey, boolean isBeta, String md5, Consumer<List<ConfigKey>> configChangeAction, long delayMs) {
+            super(delayMs, null);
             this.configKey = configKey;
             this.isBeta = isBeta;
             this.md5 = md5;
-            this.delayMs = delayMs1;
-            this.action = action;
+            this.delayMs = delayMs;
+            this.configChangeAction = configChangeAction;
         }
 
         @Override
         public void onExpiration() {
-
+            configChangeAction.accept(Collections.emptyList());
         }
 
         @Override
         public void onComplete() {
-            action.run();
+            // ignore
         }
 
         @Override
         public boolean tryComplete() {
             ConfigData configData = configManager.getConfig(configKey);
             if (ConfigManager.isEmpty(configData)) {
-                return true;
+                return false;
             }
 
             if (configData.isBeta() && !Objects.equals(configData.getBetaMd5(), md5)) {
+                configChangeAction.accept(Collections.singletonList(configKey));
                 return true;
             }
 
             if (!Objects.equals(configData.getMd5(), md5)) {
+                configChangeAction.accept(Collections.singletonList(configKey));
                 return true;
             }
             return false;
