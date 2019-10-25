@@ -84,7 +84,7 @@ public class ConfigService {
      * @return
      */
     @Async
-    public Future<Map<ConfigKey, ConfigDataDTO>> watchConfig(Map<ConfigKey, String> configMd5, String clientIp, long timeoutMs) {
+    public Future<Set<ConfigKey>> watchConfig(Map<ConfigKey, String> configMd5, String clientIp, long timeoutMs) {
         clientWatcherManager.reportClientConfig(configMd5, clientIp);
 
         Map<ConfigKey, ConfigDataDTO> changedConfigData = new HashMap<>();
@@ -124,10 +124,14 @@ public class ConfigService {
         // 如果map为空，等待timeoutMs
         if (changedConfigData.isEmpty() || allDeleted.get()) {
             // wait
+            final Set<ConfigKey> configKeys = Collections.synchronizedSet(new HashSet<>());
             final CountDownLatch waitLatch = new CountDownLatch(1);
             // register all config data
+
+            waitLatch.await();
+            return new AsyncResult<>(configKeys);
         } else {
-            return new AsyncResult<>(changedConfigData);
+            return new AsyncResult<>(changedConfigData.keySet());
         }
     }
 

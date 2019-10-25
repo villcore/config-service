@@ -7,6 +7,7 @@ import com.duduyixia.config.server.dto.ConfigWatcherDTO;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
@@ -47,7 +48,8 @@ public abstract class ConfigWatcherManager {
         private boolean isBeta;
         private String md5;
         private long delayMs;
-        private ConcurrentMap<ConfigKey>
+        private final Set<ConfigKey> configKeys;
+        private Runnable action;
 
         public DelayedConfigChangedNotifyOperation(long delayMs, Lock lock, ConfigKey configKey, boolean isBeta,
                                                    String md5, long delayMs1, Runnable action) {
@@ -71,18 +73,19 @@ public abstract class ConfigWatcherManager {
 
         @Override
         public boolean tryComplete() {
-            ConfigData configData = configManager.getConfig(configKey);
-            if (ConfigManager.isEmpty(configData)) {
-                return true;
-            }
-
-            if (configData.isBeta() && !Objects.equals(configData.getBetaMd5(), md5)) {
-                return true;
-            }
-
-            if (!Objects.equals(configData.getMd5(), md5)) {
-                return true;
-            }
+//            ConfigData configData = configManager.getConfig(configKey);
+//            if (ConfigManager.isEmpty(configData)) {
+//                return true;
+//            }
+//
+//            if (configData.isBeta() && !Objects.equals(configData.getBetaMd5(), md5)) {
+//                return true;
+//            }
+//
+//            if (!Objects.equals(configData.getMd5(), md5)) {
+//                return true;
+//            }
+//            return false;
             return false;
         }
     }
