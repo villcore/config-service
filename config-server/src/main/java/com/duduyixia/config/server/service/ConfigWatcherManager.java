@@ -3,7 +3,6 @@ package com.duduyixia.config.server.service;
 import com.duduyixia.config.server.bean.ConfigData;
 import com.duduyixia.config.server.bean.ConfigKey;
 import com.duduyixia.config.server.dto.ConfigWatcherDTO;
-import com.duduyixia.config.server.event.EventSource;
 import com.duduyixia.config.server.event.EventSources;
 
 import java.util.*;
@@ -17,14 +16,11 @@ public abstract class ConfigWatcherManager {
 
     protected ConfigManager configManager;
     protected DelayedOperationPurgatory<DelayedConfigChangedNotifyOperation> purgatory;
-    protected EventSource<ConfigKey> configChangedEventSource;
 
     public ConfigWatcherManager(ConfigManager configManager) {
         this.configManager = configManager;
         this.purgatory = new DelayedOperationPurgatory<>("config-watcher-purgatory");
-        this.configChangedEventSource = EventSources.getConfigChangeEventSource();
-
-        this.configChangedEventSource.subscribe(purgatory::checkAndComplete);
+        EventSources.getConfigChangeEventSource().subscribe(purgatory::checkAndComplete);
     }
 
     public void reportClientConfig(Map<ConfigKey, String> configMd5, final String clientIp) {

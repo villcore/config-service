@@ -38,5 +38,6 @@ public class ConfigAdminService {
         ConfigData configData = new ConfigData();
 
         EventSources.getConfigChangeEventSource().publish(configKey);
+        return null;
     }
 }
