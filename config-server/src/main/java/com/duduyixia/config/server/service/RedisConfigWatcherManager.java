@@ -4,8 +4,10 @@ import com.duduyixia.config.server.bean.ConfigKey;
 import com.duduyixia.config.server.dto.ClientConfigInfo;
 import com.duduyixia.config.server.dto.ConfigWatcherDTO;
 import com.google.gson.Gson;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 /**
  * created by WangTao on 2019-10-16
  */
+@Component
 public class RedisConfigWatcherManager extends ConfigWatcherManager {
 
     private static final Logger log = LoggerFactory.getLogger(RedisConfigWatcherManager.class);
@@ -25,14 +28,23 @@ public class RedisConfigWatcherManager extends ConfigWatcherManager {
     private final Gson gson = new Gson();
     private JedisPool jedisPool;
 
-    public void initialize() {
+    private String redisHost = "127.0.0.1";
+    private int redisPort = 6379;
+
+    public RedisConfigWatcherManager(ConfigManager configManager) {
+        super(configManager);
+        initialize();
+    }
+
+    private void initialize() {
         jedisPool = buildJedisPool();
     }
 
     private JedisPool buildJedisPool() {
-        JedisPool jedisPool = new JedisPool();
-        // TODO: config it
-        return jedisPool;
+        GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
+        poolConfig.setMaxIdle(2);
+        poolConfig.setMaxTotal(16);
+        return new JedisPool(poolConfig, redisHost, redisPort);
     }
 
     @Override

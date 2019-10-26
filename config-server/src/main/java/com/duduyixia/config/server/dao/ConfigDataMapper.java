@@ -9,4 +9,6 @@ import com.duduyixia.config.server.bean.ConfigKey;
 public interface ConfigDataMapper {
 
     public ConfigData getConfig(ConfigKey configKey);
+
+    public int insertConfig(ConfigData configData);
 }

@@ -38,8 +38,7 @@ public class ConfigManager {
     private final ScheduledExecutorService scheduler;
     private final LoadingCache<ConfigKey, ConfigData> configCache;
     private ScheduledFuture<?> cleanupSchedulerFuture ;
-
-    private EventSource<ConfigKey> configChangeEventSource;
+    private final EventSource<ConfigKey> configChangeEventSource;
 
     private final ConfigDataMapper configDataMapper;
     private final ConfigBetaIpMapper configBetaIpMapper;

@@ -3,6 +3,8 @@ package com.duduyixia.config.server.service;
 import com.duduyixia.config.server.bean.ConfigData;
 import com.duduyixia.config.server.bean.ConfigKey;
 import com.duduyixia.config.server.dto.ConfigWatcherDTO;
+import com.duduyixia.config.server.event.EventSource;
+import com.duduyixia.config.server.event.EventSources;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -15,6 +17,15 @@ public abstract class ConfigWatcherManager {
 
     protected ConfigManager configManager;
     protected DelayedOperationPurgatory<DelayedConfigChangedNotifyOperation> purgatory;
+    protected EventSource<ConfigKey> configChangedEventSource;
+
+    public ConfigWatcherManager(ConfigManager configManager) {
+        this.configManager = configManager;
+        this.purgatory = new DelayedOperationPurgatory<>("config-watcher-purgatory");
+        this.configChangedEventSource = EventSources.getConfigChangeEventSource();
+
+        this.configChangedEventSource.subscribe(purgatory::checkAndComplete);
+    }
 
     public void reportClientConfig(Map<ConfigKey, String> configMd5, final String clientIp) {
         configMd5.forEach((k, v) -> {
@@ -23,7 +34,6 @@ public abstract class ConfigWatcherManager {
     }
 
     public abstract void reportClientConfig(ConfigKey configKey, String configMd5, String clientIp);
-
 
     public List<ConfigWatcherDTO> getConfigClient(List<ConfigKey> configKeys) {
         return configKeys.stream()
@@ -44,6 +54,12 @@ public abstract class ConfigWatcherManager {
         purgatory.tryCompleteElseWatch(
                 new DelayedConfigChangedNotifyOperation(configKey, isBeta, md5, configChangeAction, timeoutMs),
                 Collections.singletonList(configKey));
+    }
+
+    public void shutdown() {
+        if (purgatory != null) {
+            purgatory.shutdown();
+        }
     }
 
     private class DelayedConfigChangedNotifyOperation extends DelayedOperation {

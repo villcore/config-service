@@ -17,6 +17,11 @@ public class ConfigWatcherDTO implements Serializable {
     public ConfigWatcherDTO() {
     }
 
+    public ConfigWatcherDTO(ConfigKey configKey, List<ClientConfigInfo> clientConfigInfoList) {
+        this.configKey = configKey;
+        this.clientConfigInfoList = clientConfigInfoList;
+    }
+
     public ConfigKey getConfigKey() {
         return configKey;
     }
