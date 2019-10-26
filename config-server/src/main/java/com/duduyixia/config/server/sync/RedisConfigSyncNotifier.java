@@ -1,6 +1,7 @@
 package com.duduyixia.config.server.sync;
 
 import com.duduyixia.config.server.bean.ConfigKey;
+import com.duduyixia.config.server.event.EventSources;
 import com.duduyixia.config.server.util.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +76,7 @@ public class RedisConfigSyncNotifier implements ConfigSynchronizer {
 
     @Override
     public void onConfigChanged(ConfigKey configKey) {
+        EventSources.getConfigChangeEventSource().publish(configKey);
     }
 
     public void close() {
