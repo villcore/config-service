@@ -14,6 +14,7 @@ import com.google.common.cache.RemovalListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.*;
@@ -22,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * created by WangTao on 2019-09-20
  */
+@Component
 public class ConfigManager {
 
     private static final Logger log = LoggerFactory.getLogger(ConfigManager.class);

@@ -27,9 +27,6 @@ public class ConfigAdminService {
     @Resource
     private ConfigManager configManager;
 
-    @Resource
-    private ConfigDataMapper configDataMapper;
-
     public ConfigWatcherDTO listConfigClient(ConfigKey configKey) {
         return configWatcherManager.getConfigClient(configKey);
     }
