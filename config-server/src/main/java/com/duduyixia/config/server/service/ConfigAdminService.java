@@ -4,7 +4,8 @@ import com.duduyixia.config.common.util.MD5;
 import com.duduyixia.config.server.bean.ConfigBetaClient;
 import com.duduyixia.config.server.bean.ConfigData;
 import com.duduyixia.config.server.bean.ConfigKey;
-import com.duduyixia.config.server.dao.ConfigDataMapper;
+import com.duduyixia.config.server.dao.ConfigBetaClientMapper;
+import com.duduyixia.config.server.dao.rds.mapper.ConfigDataMapper;
 import com.duduyixia.config.server.dto.ConfigWatcherDTO;
 import com.duduyixia.config.server.event.EventSources;
 import org.apache.commons.lang3.StringUtils;
@@ -34,14 +35,14 @@ public class ConfigAdminService {
     private ConfigDataMapper configDataMapper;
 
     @Resource
-    private ConfigBetaClient
+    private ConfigBetaClientMapper configBetaClientMapper;
 
     public ConfigWatcherDTO listConfigClient(ConfigKey configKey) {
         return configWatcherManager.getConfigClient(configKey);
     }
 
-    public boolean publishConfig(ConfigKey configKey, String configValue) {
-        boolean publishSuccess = tryPublishConfig(configKey, configValue);
+    public boolean publishConfig(ConfigKey configKey, String configValue, boolean beta, List<String> clientIp) {
+        boolean publishSuccess = tryPublishConfig(configKey, configValue, beta, clientIp);
         log.info("Publish config [{}]:[{}] result {}", configKey, configValue, publishSuccess);
         if (publishSuccess) {
             EventSources.getConfigChangeEventSource().publish(configKey);
@@ -49,8 +50,9 @@ public class ConfigAdminService {
         return publishSuccess;
     }
 
-    private boolean tryPublishConfig(ConfigKey configKey, String configValue) {
+    private boolean tryPublishConfig(ConfigKey configKey, String configValue, boolean beta, List<String> clientIp) {
         ConfigData configData = createConfigData(configKey, configValue);
+
         return configDataMapper.insertConfig(configData) > 0;
     }
 
@@ -84,6 +86,8 @@ public class ConfigAdminService {
     }
 
     private Boolean tryUpdateConfig(boolean beta, String configValue, ConfigData configData, List<String> betaClientIp) {
+        // 如果beta切换为线上
+        // 清理所有beta client
         if (!beta) {
             configData.setValue(configValue);
             configData.setMd5(MD5.getInstance().getMD5String(configValue));
