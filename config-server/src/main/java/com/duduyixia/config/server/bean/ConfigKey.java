@@ -19,6 +19,11 @@ public class ConfigKey implements Serializable {
         return new ConfigKey(namespace, evn, app, group, config);
     }
 
+    public static ConfigKey valueOf(ConfigData configData) {
+        return new ConfigKey(configData.getNamespace(), configData.getEnv(), configData.getApp(), configData.getGroup(),
+                configData.getConfig());
+    }
+
     private ConfigKey(String namespace, String env, String app, String group, String config) {
         this.namespace = namespace;
         this.env = env;

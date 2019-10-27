@@ -5,7 +5,7 @@ import com.duduyixia.config.client.internal.ConfigServiceEnv;
 import com.duduyixia.config.client.internal.config.ConfigData;
 import com.duduyixia.config.client.internal.executor.ConfigTaskExecutor;
 import com.duduyixia.config.client.internal.http.ConfigHttpClient;
-import com.duduyixia.config.client.internal.util.MD5;
+import com.duduyixia.config.common.util.MD5;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

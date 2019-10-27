@@ -10,7 +10,7 @@ import java.util.List;
  * created by WangTao on 2019-10-23
  */
 @Repository
-public interface ConfigBetaIpMapper {
+public interface ConfigBetaClientMapper {
 
     public List<ConfigBetaClient> getBetaIps(ConfigData configData);
 

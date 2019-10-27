@@ -3,7 +3,7 @@ package com.duduyixia.config.server.service;
 import com.duduyixia.config.server.bean.ConfigBetaClient;
 import com.duduyixia.config.server.bean.ConfigData;
 import com.duduyixia.config.server.bean.ConfigKey;
-import com.duduyixia.config.server.dao.ConfigBetaIpMapper;
+import com.duduyixia.config.server.dao.ConfigBetaClientMapper;
 import com.duduyixia.config.server.dao.ConfigDataMapper;
 import com.duduyixia.config.server.event.EventSource;
 import com.duduyixia.config.server.event.EventSources;
@@ -43,12 +43,12 @@ public class ConfigManager {
     private final EventSource<ConfigKey> configChangeEventSource;
 
     private final ConfigDataMapper configDataMapper;
-    private final ConfigBetaIpMapper configBetaIpMapper;
+    private final ConfigBetaClientMapper configBetaClientMapper;
 
     @Autowired
-    public ConfigManager(ConfigDataMapper configDataMapper, ConfigBetaIpMapper configBetaIpMapper) {
+    public ConfigManager(ConfigDataMapper configDataMapper, ConfigBetaClientMapper configBetaClientMapper) {
         this.configDataMapper = configDataMapper;
-        this.configBetaIpMapper = configBetaIpMapper;
+        this.configBetaClientMapper = configBetaClientMapper;
 
         configCounter = new AtomicInteger(0);
         scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -103,7 +103,7 @@ public class ConfigManager {
         }
 
         if (configData.isBeta()) {
-            List<ConfigBetaClient> configBetaClientList = configBetaIpMapper.getBetaIps(configData);
+            List<ConfigBetaClient> configBetaClientList = configBetaClientMapper.getBetaIps(configData);
             configData.setConfigBetaClientList(configBetaClientList);
         }
         return configData;

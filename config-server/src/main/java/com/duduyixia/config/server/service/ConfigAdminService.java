@@ -1,6 +1,7 @@
 package com.duduyixia.config.server.service;
 
 import com.duduyixia.config.common.util.MD5;
+import com.duduyixia.config.server.bean.ConfigBetaClient;
 import com.duduyixia.config.server.bean.ConfigData;
 import com.duduyixia.config.server.bean.ConfigKey;
 import com.duduyixia.config.server.dao.ConfigDataMapper;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.List;
 
 /**
  * created by WangTao on 2019-09-20
@@ -30,6 +32,9 @@ public class ConfigAdminService {
 
     @Resource
     private ConfigDataMapper configDataMapper;
+
+    @Resource
+    private ConfigBetaClient
 
     public ConfigWatcherDTO listConfigClient(ConfigKey configKey) {
         return configWatcherManager.getConfigClient(configKey);
@@ -65,13 +70,36 @@ public class ConfigAdminService {
         return configData;
     }
 
-    public Boolean updateConfig(Integer configId, boolean beta, String configValue) {
+    public Boolean updateConfig(Integer configId, boolean beta, String configValue, List<String> betaClientIp) {
         ConfigData configData = configDataMapper.getConfig(configId);
-        if (configData != null) {
+        if (configData == null) {
+            return false;
+        }
+
+        boolean updateSuccess = tryUpdateConfig(beta, configValue, configData, betaClientIp);
+        if (updateSuccess) {
+            EventSources.getConfigChangeEventSource().publish(ConfigKey.valueOf(configData));
+        }
+        return updateSuccess;
+    }
+
+    private Boolean tryUpdateConfig(boolean beta, String configValue, ConfigData configData, List<String> betaClientIp) {
+        if (!beta) {
             configData.setValue(configValue);
+            configData.setMd5(MD5.getInstance().getMD5String(configValue));
+            configData.setBeta(false);
+            configData.setUpdateTime(new Date());
+            boolean succeed = configDataMapper.updateConfig(configData);
+            if (succeed) {
+
+            }
+            return succeed;
+        } else {
+            configData.setBetaValue(configValue);
+            configData.setBeta(true);
+            configData.setBetaMd5(MD5.getInstance().getMD5String(configValue));
             configData.setUpdateTime(new Date());
             return configDataMapper.updateConfig(configData);
         }
-        return false;
     }
 }

@@ -1,12 +1,9 @@
 package com.duduyixia.config.server.controller;
 
 import com.duduyixia.config.server.bean.ConfigKey;
-import com.duduyixia.config.server.dto.ClientConfigInfo;
-import com.duduyixia.config.server.dto.ConfigDataDTO;
 import com.duduyixia.config.server.dto.ConfigWatcherDTO;
 import com.duduyixia.config.server.service.ConfigAdminService;
 import com.duduyixia.config.server.web.Response;
-import com.sun.xml.internal.messaging.saaj.packaging.mime.util.BEncoderStream;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,19 +35,17 @@ public class ConfigAdminController {
 
     @RequestMapping("api/v1/config/admin/update")
     @ResponseBody
-    public Response<Boolean> updateConfig(Integer configId, boolean beta, String configValue) {
+    public Response<Boolean> updateConfig(Integer configId, String configValue, boolean beta, List<String> betaClientIp) {
         if (StringUtils.isBlank(configValue)) {
             return Response.fail("参数错误");
         }
-        Boolean result = configAdminService.updateConfig(configId, beta, configValue);
+        Boolean result = configAdminService.updateConfig(configId, beta, configValue, betaClientIp);
         return Response.success(result);
     }
 
     @RequestMapping("api/v1/config/admin/delete")
-    public Object deleteConfig(ConfigKey configKey) {
-
-        // TODO:
-        return null;
+    public Response<Boolean> deleteConfig(ConfigKey configKey) {
+        return Response.fail();
     }
 
     @RequestMapping("api/v1/config/admin/list_client")
@@ -72,10 +67,6 @@ public class ConfigAdminController {
                 || StringUtils.isBlank(configKey.getConfig())) {
             return false;
         }
-
-        if (StringUtils.isBlank(configValue)) {
-            return false;
-        }
-        return true;
+        return !StringUtils.isBlank(configValue);
     }
 }
