@@ -5,6 +5,9 @@ import com.duduyixia.config.server.dto.ClientConfigInfo;
 import com.duduyixia.config.server.dto.ConfigDataDTO;
 import com.duduyixia.config.server.dto.ConfigWatcherDTO;
 import com.duduyixia.config.server.service.ConfigAdminService;
+import com.duduyixia.config.server.web.Response;
+import com.sun.xml.internal.messaging.saaj.packaging.mime.util.BEncoderStream;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -25,19 +28,22 @@ public class ConfigAdminController {
 
     @RequestMapping("api/v1/config/admin/publish")
     @ResponseBody
-    public Object publishConfig(ConfigKey configKey, String configValue) {
-        if (configKey == null || configValue == null) {
-            // TODO: error
+    public Response<Boolean> publishConfig(ConfigKey configKey, String configValue) {
+        if (!validateConfig(configKey, configValue)) {
+            return Response.fail("参数错误");
         }
-
-        return configAdminService.publishConfig(configKey, configValue);
+        Boolean result = configAdminService.publishConfig(configKey, configValue);
+        return Response.success(result);
     }
 
-    @RequestMapping("api/v1/config/admin/publish_beta")
-    public Object publishBetaConfig(ConfigKey configKey, boolean isBeta, List<String> clientIp) {
-
-        // TODO:
-        return null;
+    @RequestMapping("api/v1/config/admin/update")
+    @ResponseBody
+    public Response<Boolean> updateConfig(Integer configId, boolean beta, String configValue) {
+        if (StringUtils.isBlank(configValue)) {
+            return Response.fail("参数错误");
+        }
+        Boolean result = configAdminService.updateConfig(configId, beta, configValue);
+        return Response.success(result);
     }
 
     @RequestMapping("api/v1/config/admin/delete")
@@ -53,5 +59,23 @@ public class ConfigAdminController {
             return new ConfigWatcherDTO(null, Collections.emptyList());
         }
         return configAdminService.listConfigClient(configKey);
+    }
+
+    private boolean validateConfig(ConfigKey configKey, String configValue) {
+        if (configKey == null) {
+            return false;
+        }
+
+        if (StringUtils.isBlank(configKey.getNamespace())
+                || StringUtils.isBlank(configKey.getEnv())
+                || StringUtils.isBlank(configKey.getApp())
+                || StringUtils.isBlank(configKey.getConfig())) {
+            return false;
+        }
+
+        if (StringUtils.isBlank(configValue)) {
+            return false;
+        }
+        return true;
     }
 }

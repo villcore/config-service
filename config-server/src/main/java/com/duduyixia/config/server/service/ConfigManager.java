@@ -1,6 +1,6 @@
 package com.duduyixia.config.server.service;
 
-import com.duduyixia.config.server.bean.ConfigBetaIp;
+import com.duduyixia.config.server.bean.ConfigBetaClient;
 import com.duduyixia.config.server.bean.ConfigData;
 import com.duduyixia.config.server.bean.ConfigKey;
 import com.duduyixia.config.server.dao.ConfigBetaIpMapper;
@@ -103,8 +103,8 @@ public class ConfigManager {
         }
 
         if (configData.isBeta()) {
-            List<ConfigBetaIp> configBetaIpList = configBetaIpMapper.getBetaIps(configData);
-            configData.setConfigBetaIpList(configBetaIpList);
+            List<ConfigBetaClient> configBetaClientList = configBetaIpMapper.getBetaIps(configData);
+            configData.setConfigBetaClientList(configBetaClientList);
         }
         return configData;
     }

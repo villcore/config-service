@@ -1,6 +1,6 @@
 package com.duduyixia.config.server.service;
 
-import com.duduyixia.config.server.bean.ConfigBetaIp;
+import com.duduyixia.config.server.bean.ConfigBetaClient;
 import com.duduyixia.config.server.bean.ConfigData;
 import com.duduyixia.config.server.bean.ConfigKey;
 import com.duduyixia.config.server.dto.ConfigDataDTO;
@@ -47,12 +47,12 @@ public class ConfigService {
             return false;
         }
 
-        List<ConfigBetaIp> configBetaIpList = configData.getConfigBetaIpList();
-        if (configBetaIpList == null || configBetaIpList.isEmpty()) {
+        List<ConfigBetaClient> configBetaClientList = configData.getConfigBetaClientList();
+        if (configBetaClientList == null || configBetaClientList.isEmpty()) {
             return false;
         }
 
-        for (ConfigBetaIp betaIp : configBetaIpList) {
+        for (ConfigBetaClient betaIp : configBetaClientList) {
             if (Objects.equals(betaIp.getIp(), clientIp)) {
                 return true;
             }
@@ -86,9 +86,9 @@ public class ConfigService {
             ConfigData configData = configManager.getConfig(k);
             if (configData.isBeta()) {
                 boolean clientBeta = false;
-                List<ConfigBetaIp> betaIps = configData.getConfigBetaIpList();
-                for (ConfigBetaIp configBetaIp : betaIps) {
-                    if (configBetaIp.getIp().equals(clientIp)) {
+                List<ConfigBetaClient> betaIps = configData.getConfigBetaClientList();
+                for (ConfigBetaClient configBetaClient : betaIps) {
+                    if (configBetaClient.getIp().equals(clientIp)) {
                         clientBeta = true;
                         break;
                     }

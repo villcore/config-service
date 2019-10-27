@@ -1,6 +1,7 @@
 package com.duduyixia.config.server.bean;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -18,13 +19,17 @@ public class ConfigData implements Serializable {
     private String value;
     private String md5;
     private boolean markDeleted;
-    private long updateTimeMs;
-
-    private boolean isBeta;
+    private boolean beta;
     private String betaValue;
     private String betaMd5;
+    private Date createTime;
+    private Date updateTime;
 
-    private List<ConfigBetaIp> configBetaIpList;
+    // not db field
+    private List<ConfigBetaClient> configBetaClientList;
+
+    public ConfigData() {
+    }
 
     public Integer getId() {
         return id;
@@ -98,20 +103,12 @@ public class ConfigData implements Serializable {
         this.markDeleted = markDeleted;
     }
 
-    public long getUpdateTimeMs() {
-        return updateTimeMs;
-    }
-
-    public void setUpdateTimeMs(long updateTimeMs) {
-        this.updateTimeMs = updateTimeMs;
-    }
-
     public boolean isBeta() {
-        return isBeta;
+        return beta;
     }
 
     public void setBeta(boolean beta) {
-        isBeta = beta;
+        this.beta = beta;
     }
 
     public String getBetaValue() {
@@ -130,11 +127,75 @@ public class ConfigData implements Serializable {
         this.betaMd5 = betaMd5;
     }
 
-    public List<ConfigBetaIp> getConfigBetaIpList() {
-        return configBetaIpList;
+    public Date getCreateTime() {
+        return createTime;
     }
 
-    public void setConfigBetaIpList(List<ConfigBetaIp> configBetaIpList) {
-        this.configBetaIpList = configBetaIpList;
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public List<ConfigBetaClient> getConfigBetaClientList() {
+        return configBetaClientList;
+    }
+
+    public void setConfigBetaClientList(List<ConfigBetaClient> configBetaClientList) {
+        this.configBetaClientList = configBetaClientList;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ConfigData that = (ConfigData) o;
+        return markDeleted == that.markDeleted &&
+                beta == that.beta &&
+                createTime == that.createTime &&
+                updateTime == that.updateTime &&
+                Objects.equals(id, that.id) &&
+                Objects.equals(namespace, that.namespace) &&
+                Objects.equals(env, that.env) &&
+                Objects.equals(app, that.app) &&
+                Objects.equals(group, that.group) &&
+                Objects.equals(config, that.config) &&
+                Objects.equals(value, that.value) &&
+                Objects.equals(md5, that.md5) &&
+                Objects.equals(betaValue, that.betaValue) &&
+                Objects.equals(betaMd5, that.betaMd5) &&
+                Objects.equals(configBetaClientList, that.configBetaClientList);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, namespace, env, app, group, config, value, md5, markDeleted, beta, betaValue, betaMd5, createTime, updateTime, configBetaClientList);
+    }
+
+    @Override
+    public String toString() {
+        return "ConfigData{" +
+                "id=" + id +
+                ", namespace='" + namespace + '\'' +
+                ", env='" + env + '\'' +
+                ", app='" + app + '\'' +
+                ", group='" + group + '\'' +
+                ", config='" + config + '\'' +
+                ", value='" + value + '\'' +
+                ", md5='" + md5 + '\'' +
+                ", markDeleted=" + markDeleted +
+                ", beta=" + beta +
+                ", betaValue='" + betaValue + '\'' +
+                ", betaMd5='" + betaMd5 + '\'' +
+                ", createTime=" + createTime +
+                ", updateTime=" + updateTime +
+                ", configBetaClientList=" + configBetaClientList +
+                '}';
     }
 }

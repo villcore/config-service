@@ -72,10 +72,7 @@
         <logger name="org.springframework" level="DEBUG"></logger>
         <logger name="org.mybatis" level="DEBUG"></logger>
         <logger name="org.quartz" level="DEBUG"></logger>
-
-        <logger name="com.sharedaka.venus.tool.BiZLog" >
-            <appender-ref ref="RollingBizInfo" />
-        </logger>
+        <logger name="org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingListener" level="DEBUG"></logger>
 
         <root level="INFO">
             <appender-ref ref="Console"/>
