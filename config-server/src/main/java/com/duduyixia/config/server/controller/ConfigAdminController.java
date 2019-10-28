@@ -39,13 +39,18 @@ public class ConfigAdminController {
         if (StringUtils.isBlank(configValue)) {
             return Response.fail("参数错误");
         }
+        betaClientIp = betaClientIp == null ? Collections.emptyList() : betaClientIp;
         Boolean result = configAdminService.updateConfig(configId, beta, configValue, betaClientIp);
         return Response.success(result);
     }
 
     @RequestMapping("api/v1/config/admin/delete")
     public Response<Boolean> deleteConfig(ConfigKey configKey) {
-        return Response.fail();
+        if (!validateConfigKey(configKey)) {
+            return Response.fail("参数错误");
+        }
+        Boolean result = configAdminService.deleteConfig(configKey);
+        return Response.success(result);
     }
 
     @RequestMapping("api/v1/config/admin/list_client")
@@ -61,12 +66,19 @@ public class ConfigAdminController {
             return false;
         }
 
+        if (!validateConfigKey(configKey)) {
+            return false;
+        }
+        return !StringUtils.isBlank(configValue);
+    }
+
+    private boolean validateConfigKey(ConfigKey configKey) {
         if (StringUtils.isBlank(configKey.getNamespace())
                 || StringUtils.isBlank(configKey.getEnv())
                 || StringUtils.isBlank(configKey.getApp())
                 || StringUtils.isBlank(configKey.getConfig())) {
             return false;
         }
-        return !StringUtils.isBlank(configValue);
+        return true;
     }
 }

@@ -34,7 +34,7 @@ public class ConfigService {
      */
     public ConfigDataDTO getConfig(ConfigKey configKey, String clientIp) {
         ConfigData configData = configManager.getConfig(configKey);
-        if (ConfigManager.isEmpty(configData) || configData.isMarkDeleted()) {
+        if (ConfigManager.isEmpty(configData) || configData.getMarkDeleted()) {
             return createDeletedConfigDTO();
         }
 
@@ -43,7 +43,7 @@ public class ConfigService {
     }
 
     private boolean isClientBeta(String clientIp, ConfigData configData) {
-        if (!configData.isBeta()) {
+        if (!configData.getBeta()) {
             return false;
         }
 
@@ -69,7 +69,7 @@ public class ConfigService {
     private ConfigDataDTO createConfigDTO(ConfigData configData, boolean isClientBeta) {
         ConfigDataDTO configDataDTO = new ConfigDataDTO();
         configDataDTO.setBeta(isClientBeta);
-        configDataDTO.setMarkDeleted(configData.isMarkDeleted());
+        configDataDTO.setMarkDeleted(configData.getMarkDeleted());
         configDataDTO.setMd5(configData.getMd5());
         configDataDTO.setValue(configData.getValue());
         return configDataDTO;
@@ -84,7 +84,7 @@ public class ConfigService {
 
         configMd5.forEach((k, v) -> {
             ConfigData configData = configManager.getConfig(k);
-            if (configData.isBeta()) {
+            if (configData.getBeta()) {
                 boolean clientBeta = false;
                 List<ConfigBetaClient> betaIps = configData.getConfigBetaClientList();
                 for (ConfigBetaClient configBetaClient : betaIps) {
@@ -95,7 +95,7 @@ public class ConfigService {
                 }
 
                 if (clientBeta && !Objects.equals(configData.getBetaMd5(), v)) {
-                    if (configData.isMarkDeleted()) {
+                    if (configData.getMarkDeleted()) {
                         changedConfigData.put(k, createDeletedConfigDTO());
                     } else {
                         allDeleted.set(false);
@@ -105,7 +105,7 @@ public class ConfigService {
                 betaConfigData.add(k);
             } else {
                 if (!Objects.equals(configData.getMd5(), v)) {
-                    if (configData.isMarkDeleted()) {
+                    if (configData.getMarkDeleted()) {
                         changedConfigData.put(k, createDeletedConfigDTO());
                     } else {
                         allDeleted.set(false);
@@ -120,40 +120,6 @@ public class ConfigService {
             clientWatcherManager.watchConfig(configMd5, betaConfigData, configChangeAction, timeoutMs);
         } else {
             configChangeAction.accept(changedConfig);
-        }
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        DelayedOperationPurgatory<DelayedOperation> purgatory = new DelayedOperationPurgatory<>("TEST");
-
-        for (int i = 0; i < 300; i++) {
-            int finalI = i;
-            purgatory.tryCompleteElseWatch(new DelayedOperation(finalI * 10, null) {
-                @Override
-                public void onExpiration() {
-                    //System.out.println("expiration at " + (finalI * 1000));
-                    System.out.println(purgatory.watched() + "-" + purgatory.delayed());
-
-                }
-
-                @Override
-                public void onComplete() {
-                    // System.out.println("=============onComplete");
-                    System.out.println("onComplete at " + (finalI * 1000));
-                }
-
-                @Override
-                public boolean tryComplete() {
-                    // System.out.println("tryComplete");
-                    return false;
-                }
-            }, Arrays.asList("test" + i / 10));
-        }
-
-        Scanner scanner = new Scanner(System.in);
-        String key;
-        while ((key = scanner.next()).trim().length() > 0) {
-            purgatory.checkAndComplete(key.trim());
         }
     }
 }

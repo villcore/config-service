@@ -92,7 +92,7 @@ public abstract class ConfigWatcherManager {
                 return false;
             }
 
-            if (configData.isBeta() && !Objects.equals(configData.getBetaMd5(), md5)) {
+            if (configData.getBeta() && !Objects.equals(configData.getBetaMd5(), md5)) {
                 configChangeAction.accept(Collections.singletonList(configKey));
                 return true;
             }

@@ -7,9 +7,12 @@ import com.duduyixia.config.server.bean.ConfigKey;
  */
 public class EventSources {
 
-    // TODO: 增加通知全局server端的事件
     public static EventSource<ConfigKey> getConfigChangeEventSource() {
         return EventSourceHelper.getEventSoource("config_change_event");
+    }
+
+    public static EventSource<ConfigKey> getConfigPublishEventSource() {
+        return EventSourceHelper.getEventSoource("config_publish_event");
     }
 
     public static EventSource<Long> currentTimeMillisEventSource() {

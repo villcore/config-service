@@ -28,6 +28,7 @@ public class RedisConfigWatcherManager extends ConfigWatcherManager {
     private final Gson gson = new Gson();
     private JedisPool jedisPool;
 
+    // TODO: use value annotation
     private String redisHost = "127.0.0.1";
     private int redisPort = 6379;
 

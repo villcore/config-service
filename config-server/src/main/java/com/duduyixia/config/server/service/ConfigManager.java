@@ -3,8 +3,8 @@ package com.duduyixia.config.server.service;
 import com.duduyixia.config.server.bean.ConfigBetaClient;
 import com.duduyixia.config.server.bean.ConfigData;
 import com.duduyixia.config.server.bean.ConfigKey;
-import com.duduyixia.config.server.dao.ConfigBetaClientMapper;
-import com.duduyixia.config.server.dao.ConfigDataMapper;
+import com.duduyixia.config.server.dao.rds.mapper.ConfigBetaClientMapper;
+import com.duduyixia.config.server.dao.rds.mapper.ConfigDataMapper;
 import com.duduyixia.config.server.event.EventSource;
 import com.duduyixia.config.server.event.EventSources;
 import com.google.common.cache.CacheBuilder;
@@ -102,7 +102,7 @@ public class ConfigManager {
             return EMPTY_CONFIG;
         }
 
-        if (configData.isBeta()) {
+        if (configData.getBeta()) {
             List<ConfigBetaClient> configBetaClientList = configBetaClientMapper.getBetaIps(configData);
             configData.setConfigBetaClientList(configBetaClientList);
         }
@@ -122,7 +122,7 @@ public class ConfigManager {
         }
     }
 
-    public ConfigData updateConfig(ConfigKey configKey) {
+    public ConfigData refresh(ConfigKey configKey) {
         ConfigData configData = loadConfig(configKey);
         configCache.put(configKey, configData);
         return configData;

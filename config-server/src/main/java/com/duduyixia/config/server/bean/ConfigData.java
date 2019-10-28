@@ -1,6 +1,8 @@
 package com.duduyixia.config.server.bean;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 public class ConfigData {
     /**
@@ -449,5 +451,15 @@ public class ConfigData {
      */
     public void setBetaValue(String betaValue) {
         this.betaValue = betaValue == null ? null : betaValue.trim();
+    }
+
+    private List<ConfigBetaClient> configBetaClientList = Collections.emptyList();
+
+    public List<ConfigBetaClient> getConfigBetaClientList() {
+        return configBetaClientList;
+    }
+
+    public void setConfigBetaClientList(List<ConfigBetaClient> configBetaClientList) {
+        this.configBetaClientList = configBetaClientList;
     }
 }

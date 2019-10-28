@@ -59,11 +59,13 @@ public class RedisConfigSyncNotifier implements ConfigSynchronizer {
                 }
             }
         });
+
+        EventSources.getConfigPublishEventSource().subscribe(this::notifyConfigChanged);
     }
 
     @Override
     public void notifyConfigChanged(ConfigKey configKey) {
-        try(Jedis jedis = jedisPool.getResource()) {
+        try (Jedis jedis = jedisPool.getResource()) {
             jedis.publish(configChangedChannel(), JsonUtils.toJson(configKey));
         } catch (Exception e) {
             log.error("Notify config changed error", e);

@@ -1,8 +1,10 @@
 package com.duduyixia.config.client.internal.http;
 
+import com.duduyixia.config.client.ConfigException;
 import com.duduyixia.config.client.internal.ConfigServiceEnv;
 import com.duduyixia.config.client.internal.config.ConfigData;
 import com.duduyixia.config.client.internal.config.ConfigKey;
+import com.duduyixia.config.common.http.Response;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -14,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * created by WangTao on 2019-09-22
@@ -48,8 +49,14 @@ public class ConfigHttpClient {
 
     public ConfigData getConfigOnce(ConfigKey configKey, int timeoutMs) throws Exception {
         String url = configServiceEnv.getConfigServerUrl() + "/api/v1/config/get";
-        String resp = this.httpClient.doGet(url, Collections.emptyMap(), Collections.singletonMap("config", ConfigKey.toFlatKey(configKey)), timeoutMs);
-        return objectMapper.readValue(resp, ConfigData.class);
+        String resp = this.httpClient.doGet(url, Collections.emptyMap(),
+                Collections.singletonMap("configKey", ConfigKey.toFlatKey(configKey)), timeoutMs);
+        Response<ConfigData> response = objectMapper.readValue(resp, new TypeReference<Response<ConfigData>>(){});
+        ConfigData configData;
+        if (response == null || response.getCode() != 0 || (configData = response.getData()) == null) {
+            throw new ConfigException(String.format("Config response %s error for config key %s", resp, ConfigKey.toFlatKey(configKey)));
+        }
+        return configData;
     }
 
     public ConfigData getConfig(ConfigKey configKey) throws Exception {
@@ -59,7 +66,7 @@ public class ConfigHttpClient {
     }
 
     public List<ConfigKey> listenConfigChange(Map<ConfigKey, String> configMd5) throws Exception {
-        String url = configServiceEnv.getConfigServerUrl() + "/api/v1/config/listen";
+        String url = configServiceEnv.getConfigServerUrl() + "/api/v1/config/watch";
         final Map<String, String> flatConfigKey = new HashMap<>();
         configMd5.forEach((k, v) -> {
             flatConfigKey.put(ConfigKey.toFlatKey(k), v);
@@ -67,10 +74,13 @@ public class ConfigHttpClient {
         String configMd5Json = objectMapper.writeValueAsString(flatConfigKey);
         int configListenIntervalMs = configServiceEnv.getConfigListenIntervalMs();
         String resp = doRetryable(configListenIntervalMs, 5000,
-                () -> this.httpClient.doPost(url, Collections.emptyMap(), Collections.singletonMap("config_md5", configMd5Json), configListenIntervalMs));
-        List<String> flatConfigKeys = objectMapper.readValue(resp, new TypeReference<List<String>>() {
-        });
-        return flatConfigKeys.stream().map(ConfigKey::formFlatKey).collect(Collectors.toList());
+                () -> this.httpClient.doPost(url, Collections.emptyMap(), Collections.singletonMap("configMd5", configMd5Json), configListenIntervalMs));
+        Response<List<ConfigKey>> response = objectMapper.readValue(resp, new TypeReference<Response<List<ConfigKey>>>(){});
+        List<ConfigKey> changedConfigKey;
+        if (response == null || response.getCode() != 0 || (changedConfigKey = response.getData()) == null) {
+            throw new ConfigException(String.format("Config response %s error for config md5 %s", resp, configMd5Json));
+        }
+        return changedConfigKey;
     }
 
     private <T> T doRetryable(int timeoutMs, int retryIntervalTimeMs, Callable<T> get) throws Exception {
