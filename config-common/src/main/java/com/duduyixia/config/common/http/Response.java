@@ -1,10 +1,14 @@
 package com.duduyixia.config.common.http;
 
-public final class Response<T> {
+import java.io.Serializable;
 
-    private final int code;
-    private final String msg;
-    private final T data;
+public final class Response<T> implements Serializable {
+
+    private int code;
+    private String msg;
+    private T data;
+
+    public Response() {}
 
     public Response(int code, String msg, T data) {
         this.code = code;

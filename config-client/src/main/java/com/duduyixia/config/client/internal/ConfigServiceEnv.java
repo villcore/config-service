@@ -35,7 +35,7 @@ public final class ConfigServiceEnv {
     public static final String DEFAULT_CONFIG_EXPIRED_MS =                      String.valueOf(5 * 60 * 1000L);
     public static final String DEFAULT_HTTP_CONNECT_TIMEOUT_MS =                String.valueOf(5 * 1000L);
     public static final String DEFAULT_CONFIG_LISTEN_INTERVAL_MS =              String.valueOf(30 * 1000L);
-    public static final String DEFAULT_CONFIG_SERVER_URL =                      "http://localhost:7001";
+    public static final String DEFAULT_CONFIG_SERVER_URL =                      "http://localhost:8080";
     public static final long CONFIG_SAVED_INTERVAL_MS =                         1 * 60 * 1000L;
     public static final String DEFAULT_CONFIG_SERVER_RETRY_INTERVAL_MS =        String.valueOf(5 * 1000L);
 

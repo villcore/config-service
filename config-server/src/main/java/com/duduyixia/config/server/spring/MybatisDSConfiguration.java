@@ -13,7 +13,7 @@ import org.springframework.core.io.ClassPathResource;
 import javax.sql.DataSource;
 
 @Configuration
-@MapperScan(basePackages = {"com.duduyixia.config.server.dao"}, sqlSessionFactoryRef = "sqlSessionFactoryRDS")
+@MapperScan(basePackages = {"com.duduyixia.config.server.dao.rds"}, sqlSessionFactoryRef = "sqlSessionFactoryRDS")
 public class MybatisDSConfiguration {
 
     @Autowired

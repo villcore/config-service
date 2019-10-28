@@ -94,7 +94,8 @@ public class ConfigKey implements Serializable {
 
     public static ConfigKey formFlatKey(String flatKey) {
         Objects.requireNonNull(flatKey);
-        String[] flatKeyParts = flatKey.split(".");
+        String[] flatKeyParts = flatKey.split("\\.");
+        System.out.println(flatKeyParts.length);
         if (flatKeyParts.length != 5) {
             throw new IllegalArgumentException("Illegal flat config key : " + flatKey);
         }
