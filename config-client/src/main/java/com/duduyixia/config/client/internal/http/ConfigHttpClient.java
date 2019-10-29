@@ -4,6 +4,7 @@ import com.duduyixia.config.client.ConfigException;
 import com.duduyixia.config.client.internal.ConfigServiceEnv;
 import com.duduyixia.config.client.internal.config.ConfigData;
 import com.duduyixia.config.client.internal.config.ConfigKey;
+import com.duduyixia.config.client.internal.config.WatchConfig;
 import com.duduyixia.config.client.internal.util.JsonUtil;
 import com.duduyixia.config.common.http.Response;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -11,10 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -71,17 +69,19 @@ public class ConfigHttpClient {
         }
 
         String url = configServiceEnv.getConfigServerUrl() + "/api/v1/config/watch";
-        final Map<String, String> flatConfigKey = new HashMap<>();
+        List<WatchConfig> watchConfigs = new ArrayList<>(configMd5.size());
         configMd5.forEach((k, v) -> {
-            flatConfigKey.put(ConfigKey.toFlatKey(k), v);
+            watchConfigs.add(new WatchConfig(ConfigKey.toFlatKey(k), v));
         });
-        String configMd5Json = JsonUtil.toJson(flatConfigKey);
+        String configMd5Json = JsonUtil.toJson(watchConfigs);
         int configListenIntervalMs = configServiceEnv.getConfigListenIntervalMs();
         String resp = doRetryable(configListenIntervalMs, 5000,
                 () -> this.httpClient.doPost(url,
-                        Collections.singletonMap("content-type", "application/json;charset=UTF-8"),
-                        JsonUtil.toJson(configMd5),
+                        //Collections.singletonMap("content-type", "application/json;charset=UTF-8"),
+                        Collections.emptyMap(),
+                        Collections.singletonMap("configMd5", configMd5Json),
                         configListenIntervalMs));
+        System.out.println("===" + resp);
         Response<List<ConfigKey>> response = JsonUtil.fromJson(resp, new TypeReference<Response<List<ConfigKey>>>(){});
         List<ConfigKey> changedConfigKey;
         if (response == null || response.getCode() != 0 || (changedConfigKey = response.getData()) == null) {

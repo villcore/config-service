@@ -131,7 +131,7 @@ public class MD5 {
     }
 
     public static void main(String[] args) {
-        System.out.println(MD5.getInstance().getMD5String("test"));
+        System.out.println(MD5.getInstance().getMD5String("test-value"));
     }
 
 }
