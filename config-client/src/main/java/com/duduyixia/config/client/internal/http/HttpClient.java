@@ -10,4 +10,7 @@ public interface HttpClient {
     String doGet(String url, Map<String, String> header, Map<String, String> param, int timeoutMs) throws Exception;
 
     String doPost(String url, Map<String, String> header, Map<String, String> param, int timeoutMs) throws Exception;
+
+    String doPost(String url, Map<String, String> header, String json, int timeoutMs) throws Exception;
+
 }

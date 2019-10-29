@@ -1,9 +1,7 @@
 package com.duduyixia.config.client.internal.http;
 
 import com.duduyixia.config.client.internal.ConfigServiceEnv;
-import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
+import okhttp3.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,12 +27,14 @@ public class SimpleHttpClient implements HttpClient {
         Request.Builder builder = new Request.Builder();
         final StringBuilder targetUrl = new StringBuilder(url + "?");
         param = new HashMap<>(param);
-        param.put("timeout", String.valueOf(timeoutMs));
         param.forEach((k, v) -> {
             targetUrl.append(k).append("=").append(v).append("&");
         });
         targetUrl.setLength(targetUrl.length() - 1);
         builder.url(targetUrl.toString());
+
+        header = new HashMap<>(header);
+        header.put("timeout", String.valueOf(timeoutMs));
         header.forEach(builder::addHeader);
         builder.get();
         byte[] bytes = getSpecificReadTimeoutClient(timeoutMs).newCall(builder.build()).execute().body().bytes();
@@ -44,12 +44,25 @@ public class SimpleHttpClient implements HttpClient {
     @Override
     public String doPost(String url, Map<String, String> header, Map<String, String> param, int timeoutMs) throws Exception  {
         Request.Builder builder = new Request.Builder();
+        header = new HashMap<>(header);
+        header.put("timeout", String.valueOf(timeoutMs));
         header.forEach(builder::addHeader);
         FormBody.Builder formBuilder = new FormBody.Builder();
         param = new HashMap<>(param);
-        param.put("timeout", String.valueOf(timeoutMs));
         param.forEach(formBuilder::add);
         builder.post(formBuilder.build());
+        builder.url(url);
+        byte[] bytes = getSpecificReadTimeoutClient(timeoutMs).newCall(builder.build()).execute().body().bytes();
+        return new String(bytes, ConfigServiceEnv.CHARSET);
+    }
+
+    @Override
+    public String doPost(String url, Map<String, String> header, String json, int timeoutMs) throws Exception {
+        header = new HashMap<>(header);
+        header.put("timeout", String.valueOf(timeoutMs));
+        Request.Builder builder = new Request.Builder();
+        header.forEach(builder::addHeader);
+        builder.post(RequestBody.create(MediaType.get("application/json; charset=utf-8"), json));
         builder.url(url);
         byte[] bytes = getSpecificReadTimeoutClient(timeoutMs).newCall(builder.build()).execute().body().bytes();
         return new String(bytes, ConfigServiceEnv.CHARSET);

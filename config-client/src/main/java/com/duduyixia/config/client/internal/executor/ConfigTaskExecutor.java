@@ -89,8 +89,6 @@ public class ConfigTaskExecutor extends ThreadPoolExecutor {
                 long endTimeMs = System.currentTimeMillis();
                 long elapsed = endTimeMs - startTimeMs;
                 log.info("ConfigTask loop use time [{}] millis", elapsed);
-                System.out.println("ConfigTask loop use time [" + elapsed + "] millis");
-
             }
         }
 

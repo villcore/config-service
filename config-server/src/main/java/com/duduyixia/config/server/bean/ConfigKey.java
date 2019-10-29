@@ -14,13 +14,12 @@ public class ConfigKey implements Serializable {
     private String group;
     private String config;
 
-
     public static ConfigKey valueOf(String namespace, String evn, String app, String group, String config) {
         return new ConfigKey(namespace, evn, app, group, config);
     }
 
     public static ConfigKey valueOf(ConfigData configData) {
-        return new ConfigKey(configData.getNamespace(), configData.getEnv(), configData.getApp(), configData.getGroup(),
+        return new ConfigKey(configData.getNamespace(), configData.getEnv(), configData.getApp(), configData.getConfigGroup(),
                 configData.getConfig());
     }
 
@@ -32,7 +31,7 @@ public class ConfigKey implements Serializable {
         this.config = config;
     }
 
-    private ConfigKey() {}
+    public ConfigKey() {}
 
     public String getNamespace() {
         return namespace;
@@ -95,7 +94,6 @@ public class ConfigKey implements Serializable {
     public static ConfigKey formFlatKey(String flatKey) {
         Objects.requireNonNull(flatKey);
         String[] flatKeyParts = flatKey.split("\\.");
-        System.out.println(flatKeyParts.length);
         if (flatKeyParts.length != 5) {
             throw new IllegalArgumentException("Illegal flat config key : " + flatKey);
         }

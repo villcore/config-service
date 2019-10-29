@@ -27,7 +27,8 @@ public class ConfigController {
     private ConfigService configService;
 
     @PostMapping("api/v1/config/watch")
-    public DeferredResult<List<ConfigKey>> watchConfig(@RequestParam("configMd5") Map<ConfigKey, String> configMd5, long timeoutMs) {
+    public DeferredResult<List<ConfigKey>> watchConfig(@RequestBody Map<ConfigKey, String> configMd5,
+                                                       @RequestHeader("timeout") long timeoutMs) {
         if (timeoutMs < 5000L) {
             throw new IllegalArgumentException("timeoutMs must large than 5000 ms");
         }

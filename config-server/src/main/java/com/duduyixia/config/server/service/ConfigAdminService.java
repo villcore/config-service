@@ -70,7 +70,7 @@ public class ConfigAdminService {
                 .andNamespaceEqualTo(configKey.getNamespace())
                 .andEnvEqualTo(configKey.getEnv())
                 .andAppEqualTo(configKey.getApp())
-                .andGroupEqualTo(configKey.getGroup())
+                .andConfigGroupEqualTo(configKey.getGroup())
                 .andConfigEqualTo(configKey.getConfig());
 
         List<ConfigData> configDataList = configDataMapper.selectByExampleWithBLOBs(example);
@@ -90,13 +90,13 @@ public class ConfigAdminService {
         configData.setNamespace(configKey.getNamespace());
         configData.setEnv(configKey.getEnv());
         configData.setApp(configKey.getApp());
-        configData.setGroup(configKey.getGroup());
+        configData.setConfigGroup(configKey.getGroup());
         configData.setConfig(configKey.getConfig());
-        configData.setValue(configValue);
+        configData.setConfigValue(configValue);
         configData.setMd5(MD5.getInstance().getMD5String(configValue));
         configData.setUpdateTime(new Date());
         if (StringUtils.isBlank(configKey.getGroup())) {
-            configData.setGroup("default");
+            configData.setConfigGroup("default");
         }
         return configData;
     }
@@ -138,7 +138,7 @@ public class ConfigAdminService {
                     configBetaClientMapper.deleteByPrimaryKey(client.getId());
                 });
 
-                configData.setValue(configValue);
+                configData.setConfigValue(configValue);
                 configData.setMd5(MD5.getInstance().getMD5String(configValue));
                 configData.setBeta(false);
                 configData.setUpdateTime(new Date());
@@ -150,7 +150,7 @@ public class ConfigAdminService {
                 return updateBetaConfig(configData, configValue, betaClientIp);
             } else {
                 // normal -> normal
-                configData.setValue(configValue);
+                configData.setConfigValue(configValue);
                 configData.setMd5(MD5.getInstance().getMD5String(configValue));
                 configData.setBeta(false);
                 configData.setUpdateTime(new Date());
@@ -169,7 +169,7 @@ public class ConfigAdminService {
             configBetaClientMapper.insertSelective(betaClient);
         });
 
-        configData.setBetaValue(configValue);
+        configData.setBetaConfigValue(configValue);
         configData.setBeta(true);
         configData.setBetaMd5(MD5.getInstance().getMD5String(configValue));
         configData.setUpdateTime(new Date());

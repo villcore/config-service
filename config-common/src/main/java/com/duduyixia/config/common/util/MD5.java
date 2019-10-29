@@ -130,4 +130,8 @@ public class MD5 {
         return new String(out);
     }
 
+    public static void main(String[] args) {
+        System.out.println(MD5.getInstance().getMD5String("test"));
+    }
+
 }

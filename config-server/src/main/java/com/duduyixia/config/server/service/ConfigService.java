@@ -71,7 +71,7 @@ public class ConfigService {
         configDataDTO.setBeta(isClientBeta);
         configDataDTO.setMarkDeleted(configData.getMarkDeleted());
         configDataDTO.setMd5(configData.getMd5());
-        configDataDTO.setValue(configData.getValue());
+        configDataDTO.setValue(configData.getConfigValue());
         return configDataDTO;
     }
 

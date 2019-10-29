@@ -1,9 +1,9 @@
 package com.duduyixia.config.server.controller;
 
+import com.duduyixia.config.common.http.Response;
 import com.duduyixia.config.server.bean.ConfigKey;
 import com.duduyixia.config.server.dto.ConfigWatcherDTO;
 import com.duduyixia.config.server.service.ConfigAdminService;
-import com.duduyixia.config.server.web.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
