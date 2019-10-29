@@ -1,5 +1,6 @@
 package com.duduyixia.config.server.controller;
 
+import com.duduyixia.config.common.http.Response;
 import com.duduyixia.config.server.bean.ConfigKey;
 import com.duduyixia.config.server.dto.ConfigDataDTO;
 import com.duduyixia.config.server.service.ConfigService;
@@ -27,8 +28,8 @@ public class ConfigController {
     private ConfigService configService;
 
     @PostMapping("api/v1/config/watch")
-    public DeferredResult<List<ConfigKey>> watchConfig(@RequestBody Map<ConfigKey, String> configMd5,
-                                                       @RequestHeader("timeout") long timeoutMs) {
+    public DeferredResult<Response<List<ConfigKey>>> watchConfig(@RequestBody Map<ConfigKey, String> configMd5,
+                                                                 @RequestHeader("timeout") long timeoutMs) {
         if (timeoutMs < 5000L) {
             throw new IllegalArgumentException("timeoutMs must large than 5000 ms");
         }
@@ -37,18 +38,18 @@ public class ConfigController {
         long shrinkTimeoutMs = timeoutMs - 1000L;
 
         // define a deferred result
-        final DeferredResult<List<ConfigKey>> result = new DeferredResult<>(shrinkTimeoutMs, Collections.emptyList());
+        final DeferredResult<Response<List<ConfigKey>>> result = new DeferredResult<>(shrinkTimeoutMs, Response.success(Collections.emptyList()));
         result.onCompletion(() -> log.info("DeferredResult #{}:{} completed ", clientIp, result.hashCode()));
         result.onError(throwable -> log.error("DeferredResult #{}:{} error ", clientIp, result.hashCode(), throwable));
         result.onTimeout(() -> log.warn("DeferredResult #{}:{} timeout ", clientIp, result.hashCode()));
 
         // watch empty config
         if (configMd5 == null || configMd5.isEmpty()) {
-            result.setResult(Collections.emptyList());
+            result.setResult(Response.success(Collections.emptyList()));
         }
 
         // watch and wait
-        Consumer<List<ConfigKey>> resultConsumer = result::setResult;
+        Consumer<List<ConfigKey>> resultConsumer = (changedConfigKeys) -> result.setResult(Response.success(changedConfigKeys));
         configService.watchConfig(configMd5, clientIp, shrinkTimeoutMs, resultConsumer);
         return result;
     }

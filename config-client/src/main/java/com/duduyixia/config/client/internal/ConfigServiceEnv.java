@@ -27,7 +27,7 @@ public final class ConfigServiceEnv {
     private static final String CONFIG_SERVER_URL_KEY =                         "config.client.server.url";
     private static final String CONFIG_SERVER_RETRY_INTERVAL_MS_KEY =           "config.client.server.retry.interval.ms";
 
-    public static final String DEFAULT_NAMESPACE =                              "default_namespace";
+    public static final String DEFAULT_NAMESPACE =                              "default";
     public static final String DEFAULT_ENV =                                    "prod";
     public static final String DEFAULT_GROUP =                                  "default_group";
     public static final String DEFAULT_APP =                                    "default_app";

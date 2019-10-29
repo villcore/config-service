@@ -82,7 +82,6 @@ public class ConfigHttpClient {
                         Collections.singletonMap("content-type", "application/json;charset=UTF-8"),
                         JsonUtil.toJson(configMd5),
                         configListenIntervalMs));
-        System.out.println("======"+JsonUtil.toJson(configMd5));
         Response<List<ConfigKey>> response = JsonUtil.fromJson(resp, new TypeReference<Response<List<ConfigKey>>>(){});
         List<ConfigKey> changedConfigKey;
         if (response == null || response.getCode() != 0 || (changedConfigKey = response.getData()) == null) {

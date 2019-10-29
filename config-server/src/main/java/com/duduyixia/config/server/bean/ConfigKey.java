@@ -37,20 +37,40 @@ public class ConfigKey implements Serializable {
         return namespace;
     }
 
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+
     public String getEnv() {
         return env;
+    }
+
+    public void setEnv(String env) {
+        this.env = env;
     }
 
     public String getApp() {
         return app;
     }
 
+    public void setApp(String app) {
+        this.app = app;
+    }
+
     public String getGroup() {
         return group;
     }
 
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
     public String getConfig() {
         return config;
+    }
+
+    public void setConfig(String config) {
+        this.config = config;
     }
 
     @Override

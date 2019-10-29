@@ -98,7 +98,6 @@ public class ConfigManager {
 
     private ConfigData loadConfig(ConfigKey configKey) {
         ConfigData configData = configDataMapper.getConfig(configKey);
-        System.out.println(configData);
         if (configData == null) {
             return EMPTY_CONFIG;
         }
