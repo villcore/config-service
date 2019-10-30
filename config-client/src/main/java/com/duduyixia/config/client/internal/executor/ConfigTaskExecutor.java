@@ -20,16 +20,12 @@ public class ConfigTaskExecutor extends ThreadPoolExecutor {
 
     private static final Logger log = LoggerFactory.getLogger(ConfigTaskExecutor.class);
 
-    private static final long _5_SECONDS_TIME_MS = 5 * 1000L;
-
-    private static final Runnable WAKEUP_TASK = () -> {
-    };
-
     private final BlockingQueue<DefaultConfigDataWrapper> pendingConfigDataWrapper = new LinkedBlockingQueue<>();
     private final Map<ConfigKey, DefaultConfigDataWrapper> configDataWrapperMap = new HashMap<>();
-
     private volatile boolean shutdown = false;
     private Future<?> configTaskFuture;
+
+    private static final Runnable WAKEUP_TASK = () -> {};
 
     public ConfigTaskExecutor(int seq) {
         super(1, 1, 60L, TimeUnit.SECONDS, new ArrayBlockingQueue<>(100),
@@ -41,27 +37,6 @@ public class ConfigTaskExecutor extends ThreadPoolExecutor {
                         log.warn("ConfigTaskExecutor reject task [{}]", r);
                     }
                 });
-    }
-
-    private ConfigTaskExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime,
-                               TimeUnit unit, BlockingQueue<Runnable> workQueue) {
-        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
-    }
-
-    private ConfigTaskExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime,
-                               TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
-        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
-    }
-
-    private ConfigTaskExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime,
-                               TimeUnit unit, BlockingQueue<Runnable> workQueue, RejectedExecutionHandler handler) {
-        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, handler);
-    }
-
-    private ConfigTaskExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime,
-                               TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory,
-                               RejectedExecutionHandler handler) {
-        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, handler);
     }
 
     public void addConfigWrapper(DefaultConfigDataWrapper configDataWrapper) {
@@ -203,14 +178,13 @@ public class ConfigTaskExecutor extends ThreadPoolExecutor {
         }
     }
 
-    // TODO: shutdown
     private static class NamedThreadFactory implements ThreadFactory {
 
         private final AtomicInteger seq;
         private final String namePrefix;
         private final boolean daemon;
 
-        public NamedThreadFactory(String namePrefix, boolean daemon) {
+        NamedThreadFactory(String namePrefix, boolean daemon) {
             Objects.requireNonNull(namePrefix);
 
             this.seq = new AtomicInteger();

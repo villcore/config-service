@@ -14,7 +14,7 @@ public class ConfigTaskExecutorGroup {
         this(Math.min(Runtime.getRuntime().availableProcessors() * 2, 4));
     }
 
-    public ConfigTaskExecutorGroup(int workerPoolSize) {
+    private ConfigTaskExecutorGroup(int workerPoolSize) {
         this.configTaskExecutors = buildConfigTaskExecutorPool(workerPoolSize);
         this.configTaskExecutorChooser = new ConfigTaskExecutorChooser(configTaskExecutors);
     }
@@ -36,12 +36,12 @@ public class ConfigTaskExecutorGroup {
         private final ConfigTaskExecutor[] configTaskExecutors;
         private final AtomicInteger seq;
 
-        public ConfigTaskExecutorChooser(ConfigTaskExecutor[] configTaskExecutors) {
+        ConfigTaskExecutorChooser(ConfigTaskExecutor[] configTaskExecutors) {
             this.configTaskExecutors = configTaskExecutors;
             this.seq = new AtomicInteger();
         }
 
-        public ConfigTaskExecutor choose() {
+        ConfigTaskExecutor choose() {
             int index = toPositive(seq.getAndIncrement()) % configTaskExecutors.length;
             return configTaskExecutors[index];
         }
