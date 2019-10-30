@@ -10,10 +10,12 @@ import com.duduyixia.config.client.ConfigServiceFactory;
 public class ConfigClientDemo {
     public static void main(String[] args) throws ConfigException, InterruptedException {
         ConfigService configService = ConfigServiceFactory.createConfigService();
-
-        for (int i = 0; i < 1000; i++) {
-            System.out.println(configService.getConfig("test"));
-            Thread.sleep(1000);
+        configService.addListener("test", config -> {
+            System.out.println("config -> " + config);
+        });
+        for (int i = 0; i < 100000000; i++) {
+            //System.out.println(configService.getConfig("test"));
+            Thread.sleep(10);
         }
 
         Thread.sleep(1000 * 1000L);

@@ -148,7 +148,7 @@ public class DefaultConfigDataWrapper {
         for (Listener listener : configChangeListeners) {
             if (listener instanceof ConfigChangeListener) {
                 try {
-                    ((ConfigChangeListener) listener).onChange(configData.getConfig());
+                    ((ConfigChangeListener) listener).onChange(configData.getValue());
                 } catch (Exception e) {
                     log.error("Config Listener onChange error", e);
                 }
