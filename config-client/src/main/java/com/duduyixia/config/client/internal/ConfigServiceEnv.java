@@ -1,5 +1,6 @@
 package com.duduyixia.config.client.internal;
 
+import com.duduyixia.config.client.ConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,9 +51,18 @@ public final class ConfigServiceEnv {
     private final String configFileDir;
     private final int configServerRetryIntervalMs;
 
+    private static ConfigServiceEnv INSTANCE;
+
     public static ConfigServiceEnv load() {
-        Properties properties = System.getProperties();
-        return new ConfigServiceEnv(properties);
+        if (INSTANCE != null) {
+            return INSTANCE;
+        }
+
+        synchronized (ConfigServiceEnv.class) {
+            Properties properties = System.getProperties();
+            INSTANCE = new ConfigServiceEnv(properties);
+        }
+        return INSTANCE;
     }
 
     private ConfigServiceEnv(Properties properties) {
