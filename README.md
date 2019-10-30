@@ -2,8 +2,8 @@
 A simple config center service.
 
 
-#### SQL
-### 1. config_data
+### SQL
+#### 1. config_data
 ```
 CREATE TABLE `config_data` (
                                `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -26,7 +26,7 @@ CREATE TABLE `config_data` (
   DEFAULT CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ```
 
-### 2. config_beta_client
+#### 2. config_beta_client
 ```
     CREATE TABLE `config_beta_client` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -40,3 +40,6 @@ CREATE TABLE `config_data` (
             ) ENGINE=InnoDB
     DEFAULT CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ```
+
+### Bug 
+1. client notify问题

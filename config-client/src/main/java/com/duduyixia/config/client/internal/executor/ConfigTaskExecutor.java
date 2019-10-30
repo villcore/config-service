@@ -144,22 +144,12 @@ public class ConfigTaskExecutor extends ThreadPoolExecutor {
             }
         }
 
+        @SuppressWarnings("unchecked")
         private void handleChangedConfig() {
-            long start = System.currentTimeMillis();
             List<ConfigKey> changedConfigList = listenConfigChange(configDataWrapperMap);
             List<ConfigKey> expiredConfigList = getExpiredConfig(configDataWrapperMap);
             List<ConfigKey> fetchedConfigKeyList = mergeList(changedConfigList, expiredConfigList);
             batchedRefresh(fetchedConfigKeyList);
-            fetchedConfigKeyList.forEach(configKey -> {
-                DefaultConfigDataWrapper defaultConfigDataWrapper = configDataWrapperMap.get(configKey);
-                try {
-                    ConfigData configData = defaultConfigDataWrapper.refreshConfigData();
-                    defaultConfigDataWrapper.tryUpdateConfig(configData);
-                    defaultConfigDataWrapper.refreshConfigUpdateTime();
-                } catch (Exception e) {
-                    log.warn("Refresh changed config [{}] error ", configKey);
-                }
-            });
         }
 
         @SuppressWarnings("unchecked")
@@ -197,17 +187,15 @@ public class ConfigTaskExecutor extends ThreadPoolExecutor {
                     ConfigData configData = configDataWrapper.getConfigDataSnapshot();
                     ConfigData newConfigData = configDataWrapper.refreshConfigData();
                     boolean isMarkDeleted = newConfigData.isMarkDeleted();
-                    boolean isChanged = Objects.equals(newConfigData.getMd5(), configData.getMd5());
+                    boolean isChanged = !Objects.equals(newConfigData.getMd5(), configData.getMd5());
 
+                    configDataWrapper.tryUpdateConfig(newConfigData);
+                    configDataWrapper.refreshConfigUpdateTime();
                     if (isMarkDeleted) {
                         configDataWrapper.configMarkDeleted(configData, newConfigData);
                     } else if (isChanged) {
-                        // notify changed
                         configDataWrapper.configChanged(configData, newConfigData);
-                    } else {
-                        return;
                     }
-                    configDataWrapper.tryUpdateConfig(newConfigData);
                 } catch (Exception e) {
                     log.error("Refresh config [{}] error", configKey, e);
                 }
