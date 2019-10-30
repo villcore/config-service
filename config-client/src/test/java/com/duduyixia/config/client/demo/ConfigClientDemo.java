@@ -14,8 +14,8 @@ public class ConfigClientDemo {
             System.out.println("config -> " + config);
         });
         for (int i = 0; i < 100000000; i++) {
-            //System.out.println(configService.getConfig("test"));
-            Thread.sleep(10);
+            System.out.println(configService.getConfig("test"));
+            Thread.sleep(1000);
         }
 
         Thread.sleep(1000 * 1000L);

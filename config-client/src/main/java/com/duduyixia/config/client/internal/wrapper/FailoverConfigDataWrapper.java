@@ -6,7 +6,7 @@ import com.duduyixia.config.client.internal.config.ConfigData;
 import com.duduyixia.config.client.internal.config.ConfigKey;
 import com.duduyixia.config.client.internal.executor.ConfigTaskExecutor;
 import com.duduyixia.config.client.internal.http.ConfigHttpClient;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.duduyixia.config.client.internal.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +21,6 @@ public class FailoverConfigDataWrapper extends DefaultConfigDataWrapper {
 
     private static Logger log = LoggerFactory.getLogger(FailoverConfigDataWrapper.class);
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String CHARSET = "utf-8";
 
     private Path configFilePath;
@@ -115,7 +114,7 @@ public class FailoverConfigDataWrapper extends DefaultConfigDataWrapper {
         Path configTmpPath = Paths.get(configFileRoot, configData.getConfig() + ".tmp");
         Path targetConfigPath = configFilePath;
         try {
-            String configJson = OBJECT_MAPPER.writeValueAsString(getConfigDataSnapshot());
+            String configJson = JsonUtil.toJson(getConfigDataSnapshot());
             Files.write(configTmpPath, configJson.getBytes(CHARSET), StandardOpenOption.CREATE_NEW, StandardOpenOption.TRUNCATE_EXISTING);
 
             try {
@@ -133,7 +132,6 @@ public class FailoverConfigDataWrapper extends DefaultConfigDataWrapper {
         } catch (Exception e) {
             log.error("Write config tmp file [{}] error", targetConfigPath, e);
         }
-
         log.info("Save config [{}] to file [{}]", configData.getConfigKey(), configFilePath);
     }
 
@@ -155,17 +153,12 @@ public class FailoverConfigDataWrapper extends DefaultConfigDataWrapper {
         }
 
         try {
-            return OBJECT_MAPPER.readValue(configDataJson, ConfigData.class);
+            return JsonUtil.fromJson(configDataJson, ConfigData.class);
         } catch (Exception e) {
             throw new ConfigException(e);
         } finally {
             log.info("Read config [{}] from file [{}]", configData.getConfigKey(), configFilePath);
         }
-    }
-
-    @Override
-    public ConfigData tryUpdateConfig(ConfigData configData) {
-        return super.tryUpdateConfig(configData);
     }
 
     @Override
