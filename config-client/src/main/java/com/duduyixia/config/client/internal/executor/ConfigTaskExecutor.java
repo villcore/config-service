@@ -23,17 +23,17 @@ public class ConfigTaskExecutor extends ThreadPoolExecutor {
     private static final long _5_SECONDS_TIME_MS = 5 * 1000L;
 
     private static final Runnable WAKEUP_TASK = () -> {
-
     };
 
     private final BlockingQueue<DefaultConfigDataWrapper> pendingConfigDataWrapper = new LinkedBlockingQueue<>();
     private final Map<ConfigKey, DefaultConfigDataWrapper> configDataWrapperMap = new HashMap<>();
 
     private volatile boolean shutdown = false;
+    private Future<?> configTaskFuture;
 
-    public ConfigTaskExecutor() {
+    public ConfigTaskExecutor(int seq) {
         super(1, 1, 60L, TimeUnit.SECONDS, new ArrayBlockingQueue<>(100),
-                new NamedThreadFactory("config-task-executor", true),
+                new NamedThreadFactory("config-task-executor-" + seq, true),
                 new DiscardOldestPolicy() {
                     @Override
                     public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
@@ -41,7 +41,6 @@ public class ConfigTaskExecutor extends ThreadPoolExecutor {
                         log.warn("ConfigTaskExecutor reject task [{}]", r);
                     }
                 });
-        this.execute(new ConfigTask());
     }
 
     private ConfigTaskExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime,
@@ -67,6 +66,12 @@ public class ConfigTaskExecutor extends ThreadPoolExecutor {
 
     public void addConfigWrapper(DefaultConfigDataWrapper configDataWrapper) {
         pendingConfigDataWrapper.add(configDataWrapper);
+
+        synchronized (this) {
+            if (configTaskFuture == null) {
+                configTaskFuture = this.submit(new ConfigTask());
+            }
+        }
         execute(WAKEUP_TASK);
     }
 
@@ -142,11 +147,19 @@ public class ConfigTaskExecutor extends ThreadPoolExecutor {
         private void handleChangedConfig() {
             long start = System.currentTimeMillis();
             List<ConfigKey> changedConfigList = listenConfigChange(configDataWrapperMap);
-            System.out.println(">>>>>>>" + (System.currentTimeMillis() - start));
             List<ConfigKey> expiredConfigList = getExpiredConfig(configDataWrapperMap);
             List<ConfigKey> fetchedConfigKeyList = mergeList(changedConfigList, expiredConfigList);
             batchedRefresh(fetchedConfigKeyList);
-            fetchedConfigKeyList.forEach(configKey -> configDataWrapperMap.get(configKey).refreshConfigUpdateTime());
+            fetchedConfigKeyList.forEach(configKey -> {
+                DefaultConfigDataWrapper defaultConfigDataWrapper = configDataWrapperMap.get(configKey);
+                try {
+                    ConfigData configData = defaultConfigDataWrapper.refreshConfigData();
+                    defaultConfigDataWrapper.tryUpdateConfig(configData);
+                    defaultConfigDataWrapper.refreshConfigUpdateTime();
+                } catch (Exception e) {
+                    log.warn("Refresh changed config [{}] error ", configKey);
+                }
+            });
         }
 
         @SuppressWarnings("unchecked")
@@ -159,9 +172,7 @@ public class ConfigTaskExecutor extends ThreadPoolExecutor {
         private List<ConfigKey> listenConfigChange(Map<ConfigKey, DefaultConfigDataWrapper> configDataWrapperMap) {
             try {
                 final Map<ConfigKey, String> configMd5 = new HashMap<>(configDataWrapperMap.size());
-                configDataWrapperMap.forEach((k, v) -> {
-                    configMd5.put(k, v.getConfigDataSnapshot().getMd5());
-                });
+                configDataWrapperMap.forEach((k, v) -> configMd5.put(k, v.getConfigDataSnapshot().getMd5()));
                 return ConfigHttpClient.getInstance().listenConfigChange(configMd5);
             } catch (Exception e) {
                 log.error("Listener [{}] config change failed", configDataWrapperMap.size(), e);

@@ -5,10 +5,7 @@ import com.duduyixia.config.server.bean.ConfigKey;
 import com.duduyixia.config.server.dto.ConfigWatcherDTO;
 import com.duduyixia.config.server.service.ConfigAdminService;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.Collections;
@@ -23,7 +20,7 @@ public class ConfigAdminController {
     @Resource
     private ConfigAdminService configAdminService;
 
-    @RequestMapping("api/v1/config/admin/publish")
+    @PostMapping("api/v1/config/admin/publish")
     @ResponseBody
     public Response<Boolean> publishConfig(ConfigKey configKey, String configValue) {
         if (!validateConfig(configKey, configValue)) {
@@ -33,9 +30,10 @@ public class ConfigAdminController {
         return Response.success(result);
     }
 
-    @RequestMapping("api/v1/config/admin/update")
+    @PostMapping("api/v1/config/admin/update")
     @ResponseBody
-    public Response<Boolean> updateConfig(Integer configId, String configValue, boolean beta, List<String> betaClientIp) {
+    public Response<Boolean> updateConfig(Integer configId, String configValue, boolean beta,
+                                          @RequestParam(value = "betaClientIp", required = false) List<String> betaClientIp) {
         if (StringUtils.isBlank(configValue)) {
             return Response.fail("参数错误");
         }
@@ -44,7 +42,7 @@ public class ConfigAdminController {
         return Response.success(result);
     }
 
-    @RequestMapping("api/v1/config/admin/delete")
+    @GetMapping("api/v1/config/admin/delete")
     public Response<Boolean> deleteConfig(ConfigKey configKey) {
         if (!validateConfigKey(configKey)) {
             return Response.fail("参数错误");
@@ -53,12 +51,12 @@ public class ConfigAdminController {
         return Response.success(result);
     }
 
-    @RequestMapping("api/v1/config/admin/list_client")
-    public ConfigWatcherDTO listClient(@RequestBody ConfigKey configKey) {
+    @GetMapping("api/v1/config/admin/list_client")
+    public ConfigWatcherDTO listClient(String configKey) {
         if (configKey == null) {
             return new ConfigWatcherDTO(null, Collections.emptyList());
         }
-        return configAdminService.listConfigClient(configKey);
+        return configAdminService.listConfigClient(ConfigKey.formFlatKey(configKey));
     }
 
     private boolean validateConfig(ConfigKey configKey, String configValue) {

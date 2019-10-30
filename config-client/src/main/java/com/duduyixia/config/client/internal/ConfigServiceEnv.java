@@ -89,7 +89,6 @@ public final class ConfigServiceEnv {
                 .append("\t").append(CONFIG_SERVER_RETRY_INTERVAL_MS_KEY).append(" = ").append(configServerRetryIntervalMs).append("\n");
         sb.append("\n");
         log.info("ConfigClient env : {}", sb.toString());
-        System.out.println(sb.toString());
     }
 
     public String getNamespace() {

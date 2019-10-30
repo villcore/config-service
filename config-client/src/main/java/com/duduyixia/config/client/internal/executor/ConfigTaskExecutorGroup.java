@@ -22,7 +22,7 @@ public class ConfigTaskExecutorGroup {
     private ConfigTaskExecutor[] buildConfigTaskExecutorPool(int workerPoolSize) {
         ConfigTaskExecutor[] configTaskExecutors = new ConfigTaskExecutor[workerPoolSize];
         for (int i = 0; i < configTaskExecutors.length; i++) {
-            configTaskExecutors[i] = new ConfigTaskExecutor();
+            configTaskExecutors[i] = new ConfigTaskExecutor(i);
         }
         return configTaskExecutors;
     }

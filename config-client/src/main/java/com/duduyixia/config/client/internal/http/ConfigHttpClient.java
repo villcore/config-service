@@ -48,7 +48,6 @@ public class ConfigHttpClient {
         String url = configServiceEnv.getConfigServerUrl() + "/api/v1/config/get";
         String resp = this.httpClient.doGet(url, Collections.emptyMap(),
                 Collections.singletonMap("configKey", ConfigKey.toFlatKey(configKey)), timeoutMs);
-        System.out.println(resp);
         Response<ConfigData> response = JsonUtil.fromJson(resp, new TypeReference<Response<ConfigData>>(){});
         ConfigData configData;
         if (response == null || response.getCode() != 0 || (configData = response.getData()) == null) {
@@ -81,7 +80,6 @@ public class ConfigHttpClient {
                         Collections.emptyMap(),
                         Collections.singletonMap("configMd5", configMd5Json),
                         configListenIntervalMs));
-        System.out.println("===" + resp);
         Response<List<ConfigKey>> response = JsonUtil.fromJson(resp, new TypeReference<Response<List<ConfigKey>>>(){});
         List<ConfigKey> changedConfigKey;
         if (response == null || response.getCode() != 0 || (changedConfigKey = response.getData()) == null) {
