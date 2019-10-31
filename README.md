@@ -42,4 +42,7 @@ CREATE TABLE `config_data` (
 ```
 
 ### Bug 
-1. client notify问题
+
+### Test
+1. 多server实例
+2. 多client，beta测试
