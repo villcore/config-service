@@ -9,6 +9,11 @@ import com.duduyixia.config.client.ConfigServiceFactory;
  */
 public class ConfigClientDemo {
     public static void main(String[] args) throws ConfigException, InterruptedException {
+        // set property
+        System.setProperty("config.client.namespace", "duduyixia");
+        System.setProperty("config.client.failover", "true");
+
+        // create config service
         ConfigService configService = ConfigServiceFactory.createConfigService();
 
         // listener
@@ -16,7 +21,8 @@ public class ConfigClientDemo {
             System.out.println("config -> " + config);
         });
 
-        for (int i = 0; i < 100000000; i++) {
+        // get config
+        for (int i = 0; i < 1000; i++) {
             System.out.println(configService.getConfig("test"));
             Thread.sleep(1000);
         }
