@@ -59,7 +59,7 @@ public class FailoverConfigDataWrapper extends DefaultConfigDataWrapper {
         try {
             configDataTmp = super.getConfigData();
         } catch (ConfigException e) {
-            log.error("Get config [{}] from server failed, read local config file", ConfigKey.toFlatKey(configData.getConfigKey()), e);
+            log.error("Get config [{}] from server failed, read local config file", ConfigKey.toFlatKey(getConfigDataSnapshot().getConfigKey()), e);
         }
 
         // read from local
@@ -157,7 +157,7 @@ public class FailoverConfigDataWrapper extends DefaultConfigDataWrapper {
         } catch (Exception e) {
             throw new ConfigException(e);
         } finally {
-            log.info("Read config [{}] from file [{}]", configData.getConfigKey(), configFilePath);
+            log.info("Read config [{}] from file [{}]", getConfigDataSnapshot().getConfigKey(), configFilePath);
         }
     }
 

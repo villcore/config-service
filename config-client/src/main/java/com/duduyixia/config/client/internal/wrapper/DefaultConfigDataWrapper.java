@@ -2,6 +2,7 @@ package com.duduyixia.config.client.internal.wrapper;
 
 import com.duduyixia.config.client.*;
 import com.duduyixia.config.client.internal.ConfigServiceEnv;
+import com.duduyixia.config.client.internal.ListenerSupport;
 import com.duduyixia.config.client.internal.config.ConfigData;
 import com.duduyixia.config.client.internal.executor.ConfigTaskExecutor;
 import com.duduyixia.config.client.internal.http.ConfigHttpClient;
@@ -20,15 +21,15 @@ public class DefaultConfigDataWrapper {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultConfigDataWrapper.class);
 
-    protected volatile ConfigData configData;
-    protected final ConfigServiceEnv configServiceEnv;
-    protected final ConfigHttpClient configHttpClient;
-    protected final CopyOnWriteArrayList<Listener> configChangeListeners;
-    protected ConfigTaskExecutor configTaskExecutor;
+    private volatile ConfigData configData;
+    private final ConfigServiceEnv configServiceEnv;
+    private final ConfigHttpClient configHttpClient;
+    private final CopyOnWriteArrayList<Listener> configChangeListeners;
+    ConfigTaskExecutor configTaskExecutor;
 
     private final Object configDataLock = new Object();
 
-    public DefaultConfigDataWrapper(ConfigData configData, ConfigServiceEnv configServiceEnv, ConfigTaskExecutor configTaskExecutor,
+    DefaultConfigDataWrapper(ConfigData configData, ConfigServiceEnv configServiceEnv, ConfigTaskExecutor configTaskExecutor,
                              ConfigHttpClient configHttpClient) {
         Objects.requireNonNull(configData, "configData require non null");
         this.configData = configData;
@@ -145,27 +146,32 @@ public class DefaultConfigDataWrapper {
     @SuppressWarnings("unchecked")
     private void notifyAllListener() {
         final ConfigData configData = getConfigDataSnapshot();
-        for (Listener listener : configChangeListeners) {
-            if (listener instanceof ConfigChangeListener) {
-                try {
-                    ((ConfigChangeListener) listener).onChange(configData.getValue());
-                } catch (Exception e) {
-                    log.error("Config Listener onChange error", e);
-                }
-            } else if (listener instanceof GenericConfigChangeListener) {
-                try {
-                    GenericConfigChangeListener genericConfigChangeListener = (GenericConfigChangeListener) listener;
-                    Executor executor = genericConfigChangeListener.executor();
-                    ConfigConverter configConverter = genericConfigChangeListener.convert();
-                    if (executor != null) {
-                        Object obj = configConverter.convert(configData.getValue());
-                        executor.execute(() -> genericConfigChangeListener.onChange(obj));
-                    } else {
-                        Object obj = configConverter.convert(configData.getValue());
-                        genericConfigChangeListener.onChange(obj);
+        for (Listener configChangeListener : configChangeListeners) {
+            if (configChangeListener instanceof ListenerSupport) {
+                ListenerSupport listenerSupport = (ListenerSupport) configChangeListener;
+                Listener listener = listenerSupport.listener();
+
+                if (listener instanceof ConfigChangeListener) {
+                    try {
+                        ((ConfigChangeListener) listener).onChange(configData.getValue());
+                    } catch (Exception e) {
+                        log.error("Config Listener onChange error", e);
                     }
-                } catch (Exception e) {
-                    log.error("Config Generic Listener onChange error", e);
+                } else if (listener instanceof GenericConfigChangeListener) {
+                    try {
+                        GenericConfigChangeListener genericConfigChangeListener = (GenericConfigChangeListener) listener;
+                        Executor executor = listenerSupport.executor();
+                        ConfigConverter configConverter = listenerSupport.convert();
+                        if (executor != null) {
+                            Object obj = configConverter.convert(configData.getValue());
+                            executor.execute(() -> genericConfigChangeListener.onChange(obj));
+                        } else {
+                            Object obj = configConverter.convert(configData.getValue());
+                            genericConfigChangeListener.onChange(obj);
+                        }
+                    } catch (Exception e) {
+                        log.error("Config Generic Listener onChange error", e);
+                    }
                 }
             }
         }
