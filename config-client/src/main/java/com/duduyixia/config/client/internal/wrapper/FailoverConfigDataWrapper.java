@@ -43,9 +43,9 @@ public class FailoverConfigDataWrapper extends DefaultConfigDataWrapper {
 
         return Paths.get(
                 configServiceEnv.getConfigFileDir(),
-                configServiceEnv.getApp(),
-                configServiceEnv.getEnv(),
                 configServiceEnv.getNamespace(),
+                configServiceEnv.getEnv(),
+                configServiceEnv.getApp(),
                 group,
                 config
         );

@@ -4,6 +4,7 @@ import com.duduyixia.config.server.bean.ConfigBetaClient;
 import com.duduyixia.config.server.bean.ConfigData;
 import com.duduyixia.config.server.bean.ConfigKey;
 import com.duduyixia.config.server.dto.ConfigDataDTO;
+import com.duduyixia.config.server.util.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -53,6 +54,7 @@ public class ConfigService {
         }
 
         for (ConfigBetaClient betaIp : configBetaClientList) {
+            System.out.println(betaIp.getIp() + " => " + clientIp + Objects.equals(betaIp.getIp(), clientIp));
             if (Objects.equals(betaIp.getIp(), clientIp)) {
                 return true;
             }
@@ -70,8 +72,13 @@ public class ConfigService {
         ConfigDataDTO configDataDTO = new ConfigDataDTO();
         configDataDTO.setBeta(isClientBeta);
         configDataDTO.setMarkDeleted(configData.getMarkDeleted());
-        configDataDTO.setMd5(configData.getMd5());
-        configDataDTO.setValue(configData.getConfigValue());
+        if (isClientBeta) {
+            configDataDTO.setMd5(configData.getBetaMd5());
+            configDataDTO.setValue(configData.getBetaMd5());
+        } else {
+            configDataDTO.setMd5(configData.getMd5());
+            configDataDTO.setValue(configData.getConfigValue());
+        }
         return configDataDTO;
     }
 
