@@ -3,6 +3,8 @@ package com.duduyixia.config.server.service;
 import com.duduyixia.config.server.bean.ConfigKey;
 import com.duduyixia.config.server.dto.ClientConfigInfo;
 import com.duduyixia.config.server.dto.ConfigWatcherDTO;
+import com.duduyixia.config.server.sync.ConfigSynchronizer;
+import com.duduyixia.config.server.sync.RedisConfigSyncNotifier;
 import com.google.gson.Gson;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
@@ -32,6 +34,8 @@ public class RedisConfigWatcherManager extends ConfigWatcherManager {
     private String redisHost = "127.0.0.1";
     private int redisPort = 6379;
 
+    private ConfigSynchronizer synchronizer;
+
     public RedisConfigWatcherManager(ConfigManager configManager) {
         super(configManager);
         initialize();
@@ -39,6 +43,7 @@ public class RedisConfigWatcherManager extends ConfigWatcherManager {
 
     private void initialize() {
         jedisPool = buildJedisPool();
+        this.synchronizer = new RedisConfigSyncNotifier(jedisPool);
     }
 
     private JedisPool buildJedisPool() {

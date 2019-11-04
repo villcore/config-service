@@ -109,6 +109,7 @@ public class ConfigAdminService {
 
         boolean updateSuccess = tryUpdateConfig(configData, beta, configValue, betaClientIp);
         if (updateSuccess) {
+            log.info("Update config {} success ", configData.getId());
             EventSources.getConfigPublishEventSource().publish(ConfigKey.valueOf(configData));
             EventSources.getConfigChangeEventSource().publish(ConfigKey.valueOf(configData));
         }

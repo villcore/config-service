@@ -5,6 +5,7 @@ import com.duduyixia.config.server.event.EventSources;
 import com.duduyixia.config.server.util.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPubSub;
@@ -65,8 +66,10 @@ public class RedisConfigSyncNotifier implements ConfigSynchronizer {
 
     @Override
     public void notifyConfigChanged(ConfigKey configKey) {
+        log.info("Notify config change {} ", configKey);
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.publish(configChangedChannel(), JsonUtils.toJson(configKey));
+            log.info("Notify config {} change ", configKey);
         } catch (Exception e) {
             log.error("Notify config changed error", e);
         }

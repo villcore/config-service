@@ -7,6 +7,7 @@ import com.duduyixia.config.server.bean.ConfigKey;
  */
 public interface ConfigSynchronizer {
 
+
     public void notifyConfigChanged(ConfigKey configKey);
 
     public void onConfigChanged(ConfigKey configKey);
