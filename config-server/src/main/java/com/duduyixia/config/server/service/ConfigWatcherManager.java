@@ -1,5 +1,6 @@
 package com.duduyixia.config.server.service;
 
+import com.duduyixia.config.server.bean.ConfigBetaClient;
 import com.duduyixia.config.server.bean.ConfigData;
 import com.duduyixia.config.server.bean.ConfigKey;
 import com.duduyixia.config.server.dto.ConfigWatcherDTO;
@@ -39,16 +40,16 @@ public abstract class ConfigWatcherManager {
 
     public abstract ConfigWatcherDTO getConfigClient(ConfigKey configKey);
 
-    public void watchConfig(Map<ConfigKey, String> changedConfig, final Set<ConfigKey> betaConfigData, Map<ConfigKey, Boolean> clientBeta,
+    public void watchConfig(Map<ConfigKey, String> changedConfig, final Set<ConfigKey> betaConfigData, Map<ConfigKey, Boolean> clientBeta, String clientIp,
                             Consumer<List<ConfigKey>> configChangeAction, long timeoutMs) {
         changedConfig.forEach((configKey, md5) -> {
-            watchConfig(configKey, md5, betaConfigData.contains(configKey), clientBeta.get(configKey), configChangeAction, timeoutMs);
+            watchConfig(configKey, md5, betaConfigData.contains(configKey), clientBeta.get(configKey), clientIp, configChangeAction, timeoutMs);
         });
     }
 
-    private void watchConfig(ConfigKey configKey, String md5, boolean isBeta, boolean isClientBeta, Consumer<List<ConfigKey>> configChangeAction, long timeoutMs) {
+    private void watchConfig(ConfigKey configKey, String md5, boolean isBeta, boolean isClientBeta, String clientIp, Consumer<List<ConfigKey>> configChangeAction, long timeoutMs) {
         purgatory.tryCompleteElseWatch(
-                new DelayedConfigChangedNotifyOperation(configKey, isBeta, isClientBeta, md5, configChangeAction, timeoutMs),
+                new DelayedConfigChangedNotifyOperation(configKey, clientIp, isBeta, isClientBeta, md5, configChangeAction, timeoutMs),
                 Collections.singletonList(configKey));
     }
 
@@ -61,15 +62,17 @@ public abstract class ConfigWatcherManager {
     private class DelayedConfigChangedNotifyOperation extends DelayedOperation {
 
         private ConfigKey configKey;
+        private String clientIp;
         private boolean isBeta;
         private boolean isClientBeta;
         private String md5;
         private long delayMs;
         Consumer<List<ConfigKey>> configChangeAction;
 
-        public DelayedConfigChangedNotifyOperation(ConfigKey configKey, boolean isBeta, boolean isClientBeta, String md5, Consumer<List<ConfigKey>> configChangeAction, long delayMs) {
+        public DelayedConfigChangedNotifyOperation(ConfigKey configKey, String clientIp, boolean isBeta, boolean isClientBeta, String md5, Consumer<List<ConfigKey>> configChangeAction, long delayMs) {
             super(delayMs, null);
             this.configKey = configKey;
+            this.clientIp = clientIp;
             this.isBeta = isBeta;
             this.isClientBeta = isClientBeta;
             this.md5 = md5;
@@ -97,31 +100,48 @@ public abstract class ConfigWatcherManager {
             // beta -> beta
             if (isBeta) {
                 // beta -> beta
-                if (configData.getBeta() && !Objects.equals(configData.getBetaMd5(), md5)) {
-                    configChangeAction.accept(Collections.singletonList(configKey));
-                    return true;
+                if (configData.getBeta()) {
+                    if (isClientBeta && !Objects.equals(configData.getBetaMd5(), md5)) {
+                        configChangeAction.accept(Collections.singletonList(configKey));
+                        return true;
+                    }
+                    return false;
                 }
 
                 // beta -> normal
                 if (!configData.getBeta()) {
-                    configChangeAction.accept(Collections.singletonList(configKey));
-                    return true;
+                    if (!Objects.equals(configData.getMd5(), md5)) {
+                        configChangeAction.accept(Collections.singletonList(configKey));
+                        return true;
+                    }
+                    return false;
                 }
                 return false;
             } else {
                 // normal -> normal
-                if (!configData.getBeta() && !Objects.equals(configData.getMd5(), md5)) {
-                    configChangeAction.accept(Collections.singletonList(configKey));
-                    return true;
+                if (!configData.getBeta()) {
+                    if (!Objects.equals(configData.getMd5(), md5)) {
+                        configChangeAction.accept(Collections.singletonList(configKey));
+                        return true;
+                    }
+                    return false;
                 }
 
                 // normal -> beta
-                if (configData.getBeta()) {
+                boolean beta = false;
+                for (ConfigBetaClient configBetaClient : configData.getConfigBetaClientList()) {
+                    if (configBetaClient.getIp().equals(clientIp)) {
+                        beta = true;
+                    }
+                }
+
+                if (beta && !Objects.equals(configData.getBetaMd5(), md5)) {
                     configChangeAction.accept(Collections.singletonList(configKey));
                     return true;
                 }
+                return false;
+
             }
-            return false;
         }
     }
 }

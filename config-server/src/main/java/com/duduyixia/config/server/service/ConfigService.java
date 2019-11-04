@@ -54,7 +54,6 @@ public class ConfigService {
         }
 
         for (ConfigBetaClient betaIp : configBetaClientList) {
-            System.out.println(betaIp.getIp() + " => " + clientIp + Objects.equals(betaIp.getIp(), clientIp));
             if (Objects.equals(betaIp.getIp(), clientIp)) {
                 return true;
             }
@@ -131,7 +130,7 @@ public class ConfigService {
 
         List<ConfigKey> changedConfig = new ArrayList<>(changedConfigData.keySet());
         if (changedConfigData.isEmpty() || allDeleted.get()) {
-            clientWatcherManager.watchConfig(configMd5, betaConfigData, clientBeta, configChangeAction, timeoutMs);
+            clientWatcherManager.watchConfig(configMd5, betaConfigData, clientBeta, clientIp, configChangeAction, timeoutMs);
         } else {
             configChangeAction.accept(changedConfig);
         }
