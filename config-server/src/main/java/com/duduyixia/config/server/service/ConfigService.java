@@ -74,7 +74,7 @@ public class ConfigService {
         configDataDTO.setMarkDeleted(configData.getMarkDeleted());
         if (isClientBeta) {
             configDataDTO.setMd5(configData.getBetaMd5());
-            configDataDTO.setValue(configData.getBetaMd5());
+            configDataDTO.setValue(configData.getBetaConfigValue());
         } else {
             configDataDTO.setMd5(configData.getMd5());
             configDataDTO.setValue(configData.getConfigValue());
@@ -83,25 +83,29 @@ public class ConfigService {
     }
 
     public void watchConfig(Map<ConfigKey, String> configMd5, String clientIp, long timeoutMs, Consumer<List<ConfigKey>> configChangeAction) {
+
+        // report client ip and config md5
         clientWatcherManager.reportClientConfig(configMd5, clientIp);
 
-        Map<ConfigKey, ConfigDataDTO> changedConfigData = new HashMap<>();
-        Set<ConfigKey> betaConfigData = new HashSet<>();
+        // do watch config
         AtomicBoolean allDeleted = new AtomicBoolean(true);
+        Map<ConfigKey, ConfigDataDTO> changedConfigData = new HashMap<>(configMd5.size());
+        Set<ConfigKey> betaConfigData = new HashSet<>();
+        Map<ConfigKey, Boolean> clientBeta = new HashMap<>(configMd5.size());
 
         configMd5.forEach((k, v) -> {
             ConfigData configData = configManager.getConfig(k);
             if (configData.getBeta()) {
-                boolean clientBeta = false;
+                boolean isClientBeta = false;
                 List<ConfigBetaClient> betaIps = configData.getConfigBetaClientList();
                 for (ConfigBetaClient configBetaClient : betaIps) {
                     if (configBetaClient.getIp().equals(clientIp)) {
-                        clientBeta = true;
+                        isClientBeta = true;
                         break;
                     }
                 }
 
-                if (clientBeta && !Objects.equals(configData.getBetaMd5(), v)) {
+                if (isClientBeta && !Objects.equals(configData.getBetaMd5(), v)) {
                     if (configData.getMarkDeleted()) {
                         changedConfigData.put(k, createDeletedConfigDTO());
                     } else {
@@ -109,6 +113,8 @@ public class ConfigService {
                         changedConfigData.put(k, createConfigDTO(configData, true));
                     }
                 }
+
+                clientBeta.put(k, isClientBeta);
                 betaConfigData.add(k);
             } else {
                 if (!Objects.equals(configData.getMd5(), v)) {
@@ -119,12 +125,13 @@ public class ConfigService {
                         changedConfigData.put(k, createConfigDTO(configData, false));
                     }
                 }
+                clientBeta.put(k, false);
             }
         });
 
         List<ConfigKey> changedConfig = new ArrayList<>(changedConfigData.keySet());
         if (changedConfigData.isEmpty() || allDeleted.get()) {
-            clientWatcherManager.watchConfig(configMd5, betaConfigData, configChangeAction, timeoutMs);
+            clientWatcherManager.watchConfig(configMd5, betaConfigData, clientBeta, configChangeAction, timeoutMs);
         } else {
             configChangeAction.accept(changedConfig);
         }

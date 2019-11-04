@@ -42,7 +42,8 @@ CREATE TABLE `config_data` (
 ```
 
 ### Bug 
+1. beta与正常配置项切换，通知不生效，TODO，需要重新设计
 
 ### Test
-1. 多server实例
-2. 多client，beta测试
+1. 多client，beta测试
+2. 多server测试部署
