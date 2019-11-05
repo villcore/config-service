@@ -3,12 +3,10 @@ package com.duduyixia.config.server.service;
 import com.duduyixia.config.server.bean.ConfigKey;
 import com.duduyixia.config.server.dto.ClientConfigInfo;
 import com.duduyixia.config.server.dto.ConfigWatcherDTO;
-import com.duduyixia.config.server.sync.ConfigSynchronizer;
-import com.duduyixia.config.server.sync.RedisConfigSyncNotifier;
-import com.google.gson.Gson;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import com.duduyixia.config.server.util.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -27,30 +25,12 @@ public class RedisConfigWatcherManager extends ConfigWatcherManager {
     private static final Logger log = LoggerFactory.getLogger(RedisConfigWatcherManager.class);
 
     private static final String CONFIG_WATCHER_KEY_PREFIX = "config_watcher_";
-    private final Gson gson = new Gson();
     private JedisPool jedisPool;
 
-    // TODO: use value annotation
-    private String redisHost = "127.0.0.1";
-    private int redisPort = 6379;
-
-    private ConfigSynchronizer synchronizer;
-
-    public RedisConfigWatcherManager(ConfigManager configManager) {
+    @Autowired
+    public RedisConfigWatcherManager(ConfigManager configManager, JedisPool jedisPool) {
         super(configManager);
-        initialize();
-    }
-
-    private void initialize() {
-        jedisPool = buildJedisPool();
-        this.synchronizer = new RedisConfigSyncNotifier(jedisPool);
-    }
-
-    private JedisPool buildJedisPool() {
-        GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
-        poolConfig.setMaxIdle(2);
-        poolConfig.setMaxTotal(16);
-        return new JedisPool(poolConfig, redisHost, redisPort);
+        this.jedisPool = jedisPool;
     }
 
     @Override
@@ -70,7 +50,7 @@ public class RedisConfigWatcherManager extends ConfigWatcherManager {
         clientConfigInfo.setClientIp(clientIp);
         clientConfigInfo.setMd5(configMd5);
         clientConfigInfo.setReportTimeMillis(System.currentTimeMillis());
-        return gson.toJson(clientConfigInfo);
+        return JsonUtils.toJson(clientConfigInfo);
     }
 
     @Override
@@ -88,7 +68,7 @@ public class RedisConfigWatcherManager extends ConfigWatcherManager {
     private ConfigWatcherDTO getConfigClient(ConfigKey configKey, Map<String, String> allConfigClientInfoJson) {
         List<ClientConfigInfo> clientConfigInfoList = allConfigClientInfoJson.entrySet().stream().map(entry -> {
             try {
-                return gson.fromJson(entry.getValue(), ClientConfigInfo.class);
+                return JsonUtils.fromJson(entry.getValue(), ClientConfigInfo.class);
             } catch (Exception e) {
                 log.error("Get client config [{}], clientIp [{}] error", configKey, entry.getKey());
             }

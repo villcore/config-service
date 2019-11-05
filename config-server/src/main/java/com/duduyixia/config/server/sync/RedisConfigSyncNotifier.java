@@ -5,6 +5,7 @@ import com.duduyixia.config.server.event.EventSources;
 import com.duduyixia.config.server.util.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -16,6 +17,7 @@ import java.util.concurrent.*;
 /**
  * created by WangTao on 2019-10-18
  */
+@Component
 public class RedisConfigSyncNotifier implements ConfigSynchronizer {
 
     private static final Logger log = LoggerFactory.getLogger(RedisConfigSyncNotifier.class);
@@ -25,6 +27,7 @@ public class RedisConfigSyncNotifier implements ConfigSynchronizer {
     private volatile boolean closed;
     private final ConfigSyncNotifierPubSub pubSub;
 
+    @Autowired
     public RedisConfigSyncNotifier(JedisPool jedisPool) {
         this.jedisPool = jedisPool;
         this.pubSub = new ConfigSyncNotifierPubSub();
@@ -33,13 +36,10 @@ public class RedisConfigSyncNotifier implements ConfigSynchronizer {
     }
 
     private ExecutorService newThreadExecutor() {
-        return Executors.newSingleThreadExecutor(new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread thread = new Thread(r, "redis-config-sync-notifier-thread");
-                thread.setDaemon(true);
-                return thread;
-            }
+        return Executors.newSingleThreadExecutor(r -> {
+            Thread thread = new Thread(r, "redis-config-sync-notifier-thread");
+            thread.setDaemon(true);
+            return thread;
         });
     }
 
@@ -94,9 +94,9 @@ public class RedisConfigSyncNotifier implements ConfigSynchronizer {
 
         @Override
         public void onMessage(String channel, String message) {
-            log.info("OnMessage from channel {} message {}", channel, message);
+            log.info("OnMessage fromJson channel {} message {}", channel, message);
             try {
-                ConfigKey changedConfigKey = JsonUtils.formJson(message, ConfigKey.class);
+                ConfigKey changedConfigKey = JsonUtils.fromJson(message, ConfigKey.class);
                 onConfigChanged(changedConfigKey);
             } catch (Exception e) {
                 log.warn("Convert message json {} to ConfigKey failed", message, e);

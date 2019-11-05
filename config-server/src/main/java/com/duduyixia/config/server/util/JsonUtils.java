@@ -13,7 +13,7 @@ public final class JsonUtils {
         return GSON.toJson(object);
     }
 
-    public static <T> T formJson(String json, Class<T> klass) {
+    public static <T> T fromJson(String json, Class<T> klass) {
         return GSON.fromJson(json, klass);
     }
 }

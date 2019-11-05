@@ -105,6 +105,11 @@ public abstract class ConfigWatcherManager {
                         configChangeAction.accept(Collections.singletonList(configKey));
                         return true;
                     }
+
+                    if (!isClientBeta && !Objects.equals(configData.getMd5(), md5)) {
+                        configChangeAction.accept(Collections.singletonList(configKey));
+                        return true;
+                    }
                     return false;
                 }
 
