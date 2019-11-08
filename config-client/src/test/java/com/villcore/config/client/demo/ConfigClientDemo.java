@@ -10,7 +10,7 @@ import com.villcore.config.client.ConfigServiceFactory;
 public class ConfigClientDemo {
     public static void main(String[] args) throws ConfigException, InterruptedException {
         // set property
-        System.setProperty("config.client.namespace", "duduyixia");
+        System.setProperty("config.client.namespace", "middleware");
         System.setProperty("config.client.failover", "true");
 
         // create config service

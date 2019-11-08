@@ -1,6 +1,5 @@
 package com.villcore.config.client.internal;
 
-import com.duduyixia.config.client.*;
 import com.villcore.config.client.*;
 import com.villcore.config.client.internal.config.ConfigData;
 import com.villcore.config.client.internal.config.ConfigKey;

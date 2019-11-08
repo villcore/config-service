@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
  */
 @SpringBootApplication(exclude = {
         DataSourceAutoConfiguration.class
-},scanBasePackages = "com.duduyixia.config.server")
+},scanBasePackages = "com.villcore.config.server")
 @EnableAsync
 public class ConfigServerApp {
 

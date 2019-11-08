@@ -39,7 +39,7 @@ public class RedisConfigSynchronizerTest {
         this.configSyncNotifier = new RedisConfigSyncNotifier(jedisPool) {};
 
         for (int i = 0; i < 1000000; i++) {
-            ConfigKey configKey = ConfigKey.valueOf("duduyixia", "dev", "config-service", "default", "test");
+            ConfigKey configKey = ConfigKey.valueOf("middleware", "dev", "config-service", "default", "test");
             configSyncNotifier.notifyConfigChanged(configKey);
             Thread.sleep( 1000L);
         }
